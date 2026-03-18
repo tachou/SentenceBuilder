@@ -1,0 +1,87 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Nunito', system-ui, sans-serif;
+  --color-noun: #D6E4FF;
+  --color-noun-border: #A3BFFA;
+  --color-verb: #FFD6E0;
+  --color-verb-border: #FFA3B5;
+  --color-adjective: #FFF3C4;
+  --color-adjective-border: #F6D365;
+  --color-adverb: #D5F5E3;
+  --color-adverb-border: #82E0AA;
+  --color-phrase: #E8DAEF;
+  --color-phrase-border: #C39BD3;
+  --color-conjunction: #FFE0B2;
+  --color-conjunction-border: #FFB74D;
+}
+
+@layer base {
+  body {
+    margin: 0;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* High-contrast mode overrides */
+.high-contrast {
+  --color-noun: #A3BFFA;
+  --color-noun-border: #4A6FA5;
+  --color-verb: #FFA3B5;
+  --color-verb-border: #C0475D;
+  --color-adjective: #F6D365;
+  --color-adjective-border: #B89928;
+  --color-adverb: #82E0AA;
+  --color-adverb-border: #2E8B57;
+  --color-phrase: #C39BD3;
+  --color-phrase-border: #7B4B8A;
+  --color-conjunction: #FFB74D;
+  --color-conjunction-border: #C77800;
+}
+
+.high-contrast button:focus,
+.high-contrast [role="button"]:focus {
+  outline: 3px solid #000 !important;
+  outline-offset: 2px !important;
+}
+
+.high-contrast .text-gray-700 {
+  color: #1a1a1a;
+}
+
+.high-contrast .text-gray-500 {
+  color: #333;
+}
+
+.high-contrast .text-gray-400 {
+  color: #555;
+}
+
+.high-contrast .border-gray-300 {
+  border-color: #666;
+}
+
+.high-contrast .border-gray-200 {
+  border-color: #888;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-4px); }
+  40% { transform: translateX(4px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(3px); }
+}
