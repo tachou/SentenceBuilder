@@ -70,6 +70,27 @@ export function selectRoundWords(
   usageCounts: Record<string, number> = {}
 ): WordEntry[] {
   const all = getWordList(lang);
+  return selectFromPool(all, count, usageCounts);
+}
+
+/**
+ * Select words from a custom word pool. Same algorithm but relaxes POS requirements
+ * if the custom list lacks certain categories.
+ */
+export function selectRoundWordsFromCustom(
+  customWords: WordEntry[],
+  count: number = 14,
+  usageCounts: Record<string, number> = {}
+): WordEntry[] {
+  return selectFromPool(customWords, count, usageCounts);
+}
+
+function selectFromPool(
+  all: WordEntry[],
+  count: number,
+  usageCounts: Record<string, number>
+): WordEntry[] {
+  if (all.length <= count) return shuffle([...all]);
 
   // Group by POS
   const byPos = {
@@ -81,17 +102,21 @@ export function selectRoundWords(
     conjunction: all.filter((w) => w.pos === 'conjunction'),
   };
 
-  // Guaranteed POS picks with usage bias
-  const selected: WordEntry[] = [
-    ...weightedPick(byPos.noun, 3, usageCounts),
-    ...weightedPick(byPos.verb, 3, usageCounts),
-    ...weightedPick(byPos.adjective, 2, usageCounts),
-    ...weightedPick(byPos.adverb, 1, usageCounts),
-    ...weightedPick(byPos.phrase, 3, usageCounts),
-    ...weightedPick(byPos.conjunction, 1, usageCounts),
+  // Desired POS distribution — take as many as available
+  const targets: [keyof typeof byPos, number][] = [
+    ['noun', 3], ['verb', 3], ['adjective', 2],
+    ['adverb', 1], ['phrase', 3], ['conjunction', 1],
   ];
 
-  // Fill remaining slots from all unused words (also biased)
+  const selected: WordEntry[] = [];
+  for (const [pos, desired] of targets) {
+    const available = byPos[pos];
+    if (available.length > 0) {
+      selected.push(...weightedPick(available, Math.min(desired, available.length), usageCounts));
+    }
+  }
+
+  // Fill remaining slots from all unused words
   const usedIds = new Set(selected.map((w) => w.id));
   const remaining = all.filter((w) => !usedIds.has(w.id));
   const needed = count - selected.length;

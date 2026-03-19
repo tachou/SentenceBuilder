@@ -3,6 +3,8 @@ import type { Language } from '../types';
 import { useGameStore } from '../store/gameStore';
 import { t } from '../data/i18n';
 import { CLOUD_TTS_ENABLED } from '../config';
+import { WordListUpload } from './WordListUpload';
+import { ParentDashboard } from './ParentDashboard';
 
 const uiLanguageOptions: { code: Language; label: string }[] = [
   { code: 'en', label: 'EN' },
@@ -28,6 +30,8 @@ export function Settings({ onClose }: SettingsProps) {
   const [changingPin, setChangingPin] = useState(false);
   const [newPin, setNewPin] = useState('');
   const [pinMessage, setPinMessage] = useState('');
+  const [showWordLists, setShowWordLists] = useState(false);
+  const [showProgress, setShowProgress] = useState(false);
 
   const handlePinChange = () => {
     if (newPin.length === 4 && /^\d{4}$/.test(newPin)) {
@@ -38,6 +42,14 @@ export function Settings({ onClose }: SettingsProps) {
       setTimeout(() => setPinMessage(''), 2000);
     }
   };
+
+  if (showWordLists) {
+    return <WordListUpload onClose={() => setShowWordLists(false)} />;
+  }
+
+  if (showProgress) {
+    return <ParentDashboard onClose={() => setShowProgress(false)} />;
+  }
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
@@ -144,6 +156,22 @@ export function Settings({ onClose }: SettingsProps) {
             </div>
           </div>
         )}
+
+        {/* Word Lists & Progress buttons */}
+        <div className="mb-5 flex gap-2">
+          <button
+            onClick={() => setShowWordLists(true)}
+            className="flex-1 px-4 py-2.5 rounded-full bg-blue-50 text-blue-700 font-bold text-sm hover:bg-blue-100 transition-colors min-h-[44px]"
+          >
+            {locale.uploadWordList}
+          </button>
+          <button
+            onClick={() => setShowProgress(true)}
+            className="flex-1 px-4 py-2.5 rounded-full bg-green-50 text-green-700 font-bold text-sm hover:bg-green-100 transition-colors min-h-[44px]"
+          >
+            {locale.viewProgress}
+          </button>
+        </div>
 
         {/* Change PIN */}
         <div className="mb-2">

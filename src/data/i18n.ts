@@ -44,6 +44,44 @@ export interface LocaleStrings {
   incorrectPin: string;
   pinChanged: string;
   close: string;
+  // Word list upload
+  uploadWordList: string;
+  customWords: string;
+  defaultWords: string;
+  uploadFile: string;
+  listName: string;
+  preview: string;
+  confirmUpload: string;
+  // Progress
+  viewProgress: string;
+  totalSentences: string;
+  correctPercent: string;
+  sentencesToday: string;
+  streak: string;
+  perLanguage: string;
+  last30Days: string;
+  mostUsedWords: string;
+  noDataYet: string;
+  // Badges
+  badgeGallery: string;
+  badgeEarned: string;
+  locked: string;
+  badgeFirstSentence: string;
+  badgeFirstSentenceDesc: string;
+  badgeCorrect10: string;
+  badgeCorrect10Desc: string;
+  badgeCorrect50: string;
+  badgeCorrect50Desc: string;
+  badgeCorrect100: string;
+  badgeCorrect100Desc: string;
+  badgePolyglot: string;
+  badgePolyglotDesc: string;
+  badgeStreak5: string;
+  badgeStreak5Desc: string;
+  badgeStreak10: string;
+  badgeStreak10Desc: string;
+  badgeDaily5: string;
+  badgeDaily5Desc: string;
 }
 
 const locales: Record<Language, LocaleStrings> = {
@@ -90,6 +128,41 @@ const locales: Record<Language, LocaleStrings> = {
     incorrectPin: 'Incorrect PIN, try again!',
     pinChanged: 'PIN changed!',
     close: 'Close',
+    uploadWordList: 'Word Lists',
+    customWords: 'Your Lists',
+    defaultWords: 'Default Words',
+    uploadFile: 'Upload New List',
+    listName: 'List name',
+    preview: 'Preview',
+    confirmUpload: 'Confirm Upload',
+    viewProgress: 'Progress',
+    totalSentences: 'Total',
+    correctPercent: 'Correct',
+    sentencesToday: 'Today',
+    streak: 'Day streak',
+    perLanguage: 'By Language',
+    last30Days: 'Last 30 Days',
+    mostUsedWords: 'Most Used Words',
+    noDataYet: 'No data yet. Start building sentences!',
+    badgeGallery: 'Badges',
+    badgeEarned: 'Badge Earned!',
+    locked: 'Locked',
+    badgeFirstSentence: 'First Sentence',
+    badgeFirstSentenceDesc: 'Built your very first sentence!',
+    badgeCorrect10: 'Grammar Star',
+    badgeCorrect10Desc: '10 correct sentences!',
+    badgeCorrect50: 'Sentence Master',
+    badgeCorrect50Desc: '50 correct sentences!',
+    badgeCorrect100: 'Word Wizard',
+    badgeCorrect100Desc: '100 correct sentences!',
+    badgePolyglot: 'Polyglot',
+    badgePolyglotDesc: 'Tried all three languages!',
+    badgeStreak5: 'On Fire',
+    badgeStreak5Desc: '5 correct in a row!',
+    badgeStreak10: 'Unstoppable',
+    badgeStreak10Desc: '10 correct in a row!',
+    badgeDaily5: 'Busy Builder',
+    badgeDaily5Desc: '5 sentences in one day!',
   },
   fr: {
     appTitle: 'SentenceBuilder',
@@ -134,6 +207,41 @@ const locales: Record<Language, LocaleStrings> = {
     incorrectPin: 'PIN incorrect, r\u00e9essaie !',
     pinChanged: 'PIN chang\u00e9 !',
     close: 'Fermer',
+    uploadWordList: 'Listes de mots',
+    customWords: 'Vos listes',
+    defaultWords: 'Mots par d\u00e9faut',
+    uploadFile: 'Ajouter une liste',
+    listName: 'Nom de la liste',
+    preview: 'Aper\u00e7u',
+    confirmUpload: 'Confirmer',
+    viewProgress: 'Progr\u00e8s',
+    totalSentences: 'Total',
+    correctPercent: 'Correct',
+    sentencesToday: "Aujourd'hui",
+    streak: 'Jours cons\u00e9cutifs',
+    perLanguage: 'Par langue',
+    last30Days: '30 derniers jours',
+    mostUsedWords: 'Mots les plus utilis\u00e9s',
+    noDataYet: 'Pas encore de donn\u00e9es. Commence \u00e0 construire !',
+    badgeGallery: 'Badges',
+    badgeEarned: 'Badge obtenu !',
+    locked: 'Verrouill\u00e9',
+    badgeFirstSentence: 'Premi\u00e8re phrase',
+    badgeFirstSentenceDesc: 'Tu as construit ta premi\u00e8re phrase !',
+    badgeCorrect10: '\u00c9toile de grammaire',
+    badgeCorrect10Desc: '10 phrases correctes !',
+    badgeCorrect50: 'Ma\u00eetre des phrases',
+    badgeCorrect50Desc: '50 phrases correctes !',
+    badgeCorrect100: 'Magicien des mots',
+    badgeCorrect100Desc: '100 phrases correctes !',
+    badgePolyglot: 'Polyglotte',
+    badgePolyglotDesc: 'Tu as essay\u00e9 les trois langues !',
+    badgeStreak5: 'En feu',
+    badgeStreak5Desc: '5 correctes de suite !',
+    badgeStreak10: 'Inarr\u00eatable',
+    badgeStreak10Desc: '10 correctes de suite !',
+    badgeDaily5: 'Constructeur assidu',
+    badgeDaily5Desc: '5 phrases en un jour !',
   },
   'zh-Hans': {
     appTitle: 'SentenceBuilder',
@@ -178,6 +286,41 @@ const locales: Record<Language, LocaleStrings> = {
     incorrectPin: 'PIN\u4e0d\u6b63\u786e\uff0c\u518d\u8bd5\u4e00\u6b21\uff01',
     pinChanged: 'PIN\u5df2\u4fee\u6539\uff01',
     close: '\u5173\u95ed',
+    uploadWordList: '\u8bcd\u8868',
+    customWords: '\u4f60\u7684\u8bcd\u8868',
+    defaultWords: '\u9ed8\u8ba4\u8bcd\u8bed',
+    uploadFile: '\u4e0a\u4f20\u65b0\u8bcd\u8868',
+    listName: '\u8bcd\u8868\u540d\u79f0',
+    preview: '\u9884\u89c8',
+    confirmUpload: '\u786e\u8ba4\u4e0a\u4f20',
+    viewProgress: '\u8fdb\u5ea6',
+    totalSentences: '\u603b\u8ba1',
+    correctPercent: '\u6b63\u786e\u7387',
+    sentencesToday: '\u4eca\u5929',
+    streak: '\u8fde\u7eed\u5929\u6570',
+    perLanguage: '\u6309\u8bed\u8a00',
+    last30Days: '\u8fd1 30 \u5929',
+    mostUsedWords: '\u6700\u5e38\u7528\u8bcd\u8bed',
+    noDataYet: '\u8fd8\u6ca1\u6709\u6570\u636e\u3002\u5f00\u59cb\u9020\u53e5\u5427\uff01',
+    badgeGallery: '\u5fbd\u7ae0',
+    badgeEarned: '\u83b7\u5f97\u5fbd\u7ae0\uff01',
+    locked: '\u672a\u89e3\u9501',
+    badgeFirstSentence: '\u7b2c\u4e00\u53e5',
+    badgeFirstSentenceDesc: '\u4f60\u9020\u51fa\u4e86\u7b2c\u4e00\u53e5\u8bdd\uff01',
+    badgeCorrect10: '\u8bed\u6cd5\u4e4b\u661f',
+    badgeCorrect10Desc: '10\u53e5\u6b63\u786e\uff01',
+    badgeCorrect50: '\u9020\u53e5\u5927\u5e08',
+    badgeCorrect50Desc: '50\u53e5\u6b63\u786e\uff01',
+    badgeCorrect100: '\u8bcd\u8bed\u9b54\u6cd5\u5e08',
+    badgeCorrect100Desc: '100\u53e5\u6b63\u786e\uff01',
+    badgePolyglot: '\u591a\u8bed\u8fbe\u4eba',
+    badgePolyglotDesc: '\u4f60\u5c1d\u8bd5\u4e86\u4e09\u79cd\u8bed\u8a00\uff01',
+    badgeStreak5: '\u706b\u529b\u5168\u5f00',
+    badgeStreak5Desc: '\u8fde\u7eed5\u53e5\u6b63\u786e\uff01',
+    badgeStreak10: '\u52bf\u4e0d\u53ef\u6321',
+    badgeStreak10Desc: '\u8fde\u7eed10\u53e5\u6b63\u786e\uff01',
+    badgeDaily5: '\u52e4\u594b\u5efa\u9020\u8005',
+    badgeDaily5Desc: '\u4e00\u5929\u5185\u9020\u4e865\u53e5\uff01',
   },
 };
 

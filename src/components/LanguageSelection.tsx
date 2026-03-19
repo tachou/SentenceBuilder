@@ -4,6 +4,7 @@ import { useGameStore } from '../store/gameStore';
 import { t } from '../data/i18n';
 import { PinGate } from './PinGate';
 import { Settings } from './Settings';
+import { WordListUpload } from './WordListUpload';
 
 const languages: { code: Language; name: string; native: string; emoji: string; color: string }[] = [
   { code: 'en', name: 'English', native: 'English', emoji: '\ud83d\udc36', color: 'from-blue-100 to-blue-200' },
@@ -26,6 +27,8 @@ export function LanguageSelection() {
 
   const [showPinGate, setShowPinGate] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showUploadPinGate, setShowUploadPinGate] = useState(false);
+  const [showWordListUpload, setShowWordListUpload] = useState(false);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-sky-100 via-purple-50 to-pink-100 flex flex-col items-center justify-center p-6 relative">
@@ -75,9 +78,12 @@ export function LanguageSelection() {
 
       <div className="flex flex-col md:flex-row gap-6 md:gap-8">
         {languages.map((lang) => (
-          <button
+          <div
             key={lang.code}
             onClick={() => setLanguage(lang.code)}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setLanguage(lang.code); } }}
+            role="button"
+            tabIndex={0}
             className={`
               group relative w-52 h-52 md:w-56 md:h-56
               rounded-3xl bg-gradient-to-br ${lang.color}
@@ -96,7 +102,18 @@ export function LanguageSelection() {
             <span className="text-2xl md:text-3xl font-bold text-gray-700">
               {lang.native}
             </span>
-          </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowUploadPinGate(true);
+              }}
+              className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/80 hover:bg-white shadow-sm flex items-center justify-center text-sm text-gray-500 hover:text-blue-600 transition-all opacity-0 group-hover:opacity-100"
+              aria-label={locale.uploadWordList}
+              title={locale.uploadWordList}
+            >
+              {'\u2b06'}
+            </button>
+          </div>
         ))}
       </div>
 
@@ -118,6 +135,22 @@ export function LanguageSelection() {
       {/* Settings Panel */}
       {showSettings && (
         <Settings onClose={() => setShowSettings(false)} />
+      )}
+
+      {/* Upload PIN Gate */}
+      {showUploadPinGate && (
+        <PinGate
+          onSuccess={() => {
+            setShowUploadPinGate(false);
+            setShowWordListUpload(true);
+          }}
+          onCancel={() => setShowUploadPinGate(false)}
+        />
+      )}
+
+      {/* Word List Upload */}
+      {showWordListUpload && (
+        <WordListUpload onClose={() => setShowWordListUpload(false)} />
       )}
     </div>
   );

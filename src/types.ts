@@ -30,6 +30,15 @@ export interface GrammarFeedback {
   errorTileIds?: string[];
 }
 
+// Badge definition as returned by the API
+export interface BadgeInfo {
+  id: string;
+  icon: string;
+  nameKey: string;
+  descriptionKey: string;
+  earned: boolean;
+}
+
 export const POS_COLORS: Record<PartOfSpeech, { bg: string; border: string; label: string }> = {
   noun: { bg: 'bg-noun', border: 'border-noun-border', label: 'N' },
   verb: { bg: 'bg-verb', border: 'border-verb-border', label: 'V' },

@@ -1,7 +1,8 @@
 import { create } from 'zustand';
-import type { Language, WordTile, GrammarFeedback } from '../types';
-import { selectRoundWords } from '../data/wordLists';
+import type { Language, WordTile, WordEntry, GrammarFeedback } from '../types';
+import { selectRoundWords, selectRoundWordsFromCustom } from '../data/wordLists';
 import { validateGrammarAsync } from '../data/grammarEngine';
+import { logProgressEvent, checkBadges } from '../lib/api';
 
 // --- localStorage persistence helpers ---
 const STORAGE_KEY = 'sentence-builder-settings';
@@ -46,6 +47,17 @@ interface GameState {
   wordUsageCount: Record<string, number>;
   showSettings: boolean;
 
+  // Custom word list
+  activeCustomListId: number | null;
+  customWords: WordEntry[];
+
+  // Badge celebration
+  newlyEarnedBadges: string[];
+  showBadgeCelebration: boolean;
+
+  // Progress counter
+  sentencesToday: number;
+
   setLanguage: (lang: Language) => void;
   setUiLanguage: (lang: Language) => void;
   startNewRound: () => void;
@@ -63,18 +75,20 @@ interface GameState {
   setTTSProvider: (provider: 'browser' | 'cloud') => void;
   setShowSettings: (show: boolean) => void;
   goHome: () => void;
+  setActiveCustomList: (listId: number | null, words?: WordEntry[]) => void;
+  dismissBadgeCelebration: () => void;
+  setSentencesToday: (count: number) => void;
 }
 
 const MAX_TRAY_SIZE = 7;
 
-function createTileInstances(words: ReturnType<typeof selectRoundWords>): WordTile[] {
+function createTileInstances(words: WordEntry[]): WordTile[] {
   return words.map((w, i) => ({
     ...w,
     instanceId: `${w.id}-${Date.now()}-${i}`,
   }));
 }
 
-/** Persist current settings to localStorage */
 function persistSettings(state: GameState) {
   saveSettings({
     uiLanguage: state.uiLanguage,
@@ -85,7 +99,6 @@ function persistSettings(state: GameState) {
   });
 }
 
-/** Increment usage counts for a set of selected words */
 function incrementUsage(
   current: Record<string, number>,
   words: { id: string }[]
@@ -95,6 +108,13 @@ function incrementUsage(
     updated[w.id] = (updated[w.id] || 0) + 1;
   }
   return updated;
+}
+
+function pickRoundWords(state: GameState, lang: Language): WordEntry[] {
+  if (state.activeCustomListId && state.customWords.length > 0) {
+    return selectRoundWordsFromCustom(state.customWords, 14, state.wordUsageCount);
+  }
+  return selectRoundWords(lang, 14, state.wordUsageCount);
 }
 
 export const useGameStore = create<GameState>((set, get) => ({
@@ -111,10 +131,15 @@ export const useGameStore = create<GameState>((set, get) => ({
   ttsProvider: persisted.ttsProvider || 'browser',
   wordUsageCount: persisted.wordUsageCount || {},
   showSettings: false,
+  activeCustomListId: null,
+  customWords: [],
+  newlyEarnedBadges: [],
+  showBadgeCelebration: false,
+  sentencesToday: 0,
 
   setLanguage: (lang) => {
     const state = get();
-    const words = selectRoundWords(lang, 14, state.wordUsageCount);
+    const words = pickRoundWords(state, lang);
     const newUsage = incrementUsage(state.wordUsageCount, words);
     set({
       language: lang,
@@ -134,7 +159,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   startNewRound: () => {
     const state = get();
     if (!state.language) return;
-    const words = selectRoundWords(state.language, 14, state.wordUsageCount);
+    const words = pickRoundWords(state, state.language);
     const newUsage = incrementUsage(state.wordUsageCount, words);
     set({
       wordPool: createTileInstances(words),
@@ -148,10 +173,8 @@ export const useGameStore = create<GameState>((set, get) => ({
   addToTray: (instanceId) => {
     const { wordPool, sentenceTray } = get();
     if (sentenceTray.length >= MAX_TRAY_SIZE) return;
-
     const tile = wordPool.find((t) => t.instanceId === instanceId);
     if (!tile) return;
-
     set({
       wordPool: wordPool.filter((t) => t.instanceId !== instanceId),
       sentenceTray: [...sentenceTray, tile],
@@ -163,7 +186,6 @@ export const useGameStore = create<GameState>((set, get) => ({
     const { wordPool, sentenceTray } = get();
     const tile = sentenceTray.find((t) => t.instanceId === instanceId);
     if (!tile) return;
-
     set({
       sentenceTray: sentenceTray.filter((t) => t.instanceId !== instanceId),
       wordPool: [...wordPool, tile],
@@ -195,11 +217,9 @@ export const useGameStore = create<GameState>((set, get) => ({
     const { tier1, tier2Promise } = validateGrammarAsync(sentenceTray, language, uiLanguage);
     set({ feedback: tier1 });
 
-    // If LLM validation is running, update feedback when it completes
     if (tier2Promise) {
       tier2Promise.then((tier2) => {
         if (tier2) {
-          // Only update if the feedback hasn't been cleared by the user
           const current = get().feedback;
           if (current && current.hint === tier1.hint) {
             set({ feedback: tier2 });
@@ -207,14 +227,30 @@ export const useGameStore = create<GameState>((set, get) => ({
         }
       });
     }
+
+    // Fire-and-forget progress logging
+    const joiner = language === 'zh-Hans' ? '' : ' ';
+    const sentence = sentenceTray.map(t => t.word).join(joiner);
+    logProgressEvent({
+      event_type: 'sentence_submitted',
+      language,
+      result: tier1.result,
+      words_used: sentenceTray.map(t => t.word),
+      sentence,
+    });
+
+    set((s) => ({ sentencesToday: s.sentencesToday + 1 }));
+
+    checkBadges().then((newlyEarned) => {
+      if (newlyEarned.length > 0) {
+        set({ newlyEarnedBadges: newlyEarned, showBadgeCelebration: true });
+      }
+    });
   },
 
   clearFeedback: () => set({ feedback: null }),
-
   setIsPlaying: (playing) => set({ isPlaying: playing }),
-
   setHighlightedTileIndex: (index) => set({ highlightedTileIndex: index }),
-
   togglePinyin: () => set((s) => ({ showPinyin: !s.showPinyin })),
 
   setHighContrast: (on) => {
@@ -243,4 +279,22 @@ export const useGameStore = create<GameState>((set, get) => ({
       isPlaying: false,
       highlightedTileIndex: null,
     }),
+
+  setActiveCustomList: (listId, words) => {
+    set({
+      activeCustomListId: listId,
+      customWords: words || [],
+    });
+  },
+
+  dismissBadgeCelebration: () => {
+    const { newlyEarnedBadges } = get();
+    const remaining = newlyEarnedBadges.slice(1);
+    set({
+      newlyEarnedBadges: remaining,
+      showBadgeCelebration: remaining.length > 0,
+    });
+  },
+
+  setSentencesToday: (count) => set({ sentencesToday: count }),
 }));

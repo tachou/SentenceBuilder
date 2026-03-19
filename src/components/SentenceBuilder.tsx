@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import {
   DndContext,
   DragOverlay,
@@ -15,7 +15,10 @@ import { WordPool } from './WordPool';
 import { SentenceTray } from './SentenceTray';
 import { PlayButton } from './PlayButton';
 import { FeedbackOverlay } from './FeedbackOverlay';
+import { BadgeCelebration } from './BadgeCelebration';
+import { BadgeGallery } from './BadgeGallery';
 import { WordTileComponent } from './WordTileComponent';
+import { fetchTodayCount } from '../lib/api';
 import type { WordTile } from '../types';
 
 export function SentenceBuilder() {
@@ -32,10 +35,19 @@ export function SentenceBuilder() {
   const showPinyin = useGameStore((s) => s.showPinyin);
   const togglePinyin = useGameStore((s) => s.togglePinyin);
 
+  const sentencesToday = useGameStore((s) => s.sentencesToday);
+  const setSentencesToday = useGameStore((s) => s.setSentencesToday);
+  const showBadgeCelebration = useGameStore((s) => s.showBadgeCelebration);
+
   const [activeTile, setActiveTile] = useState<WordTile | null>(null);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [showBadgeGallery, setShowBadgeGallery] = useState(false);
 
   const locale = t(uiLanguage);
+
+  useEffect(() => {
+    fetchTodayCount().then((count) => setSentencesToday(count)).catch(() => {});
+  }, [setSentencesToday]);
 
   const pointerSensor = useSensor(PointerSensor, {
     activationConstraint: { distance: 8 },
@@ -118,9 +130,22 @@ export function SentenceBuilder() {
           </button>
 
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowBadgeGallery(true)}
+              className="p-1.5 rounded-full hover:bg-purple-100 transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center text-lg"
+              aria-label={locale.badgeGallery}
+              title={locale.badgeGallery}
+            >
+              {'\ud83c\udfc6'}
+            </button>
             <h1 className="text-lg md:text-xl font-bold text-purple-700">
               {locale.appTitle}
             </h1>
+            {sentencesToday > 0 && (
+              <span className="text-xs font-bold text-purple-500 bg-purple-100 px-2 py-0.5 rounded-full">
+                {'\u2b50'} {sentencesToday}
+              </span>
+            )}
             {language === 'zh-Hans' && (
               <button
                 onClick={togglePinyin}
@@ -212,6 +237,14 @@ export function SentenceBuilder() {
             </span>
           ))}
         </footer>
+
+        {/* Badge Celebration */}
+        {showBadgeCelebration && <BadgeCelebration />}
+
+        {/* Badge Gallery */}
+        {showBadgeGallery && (
+          <BadgeGallery onClose={() => setShowBadgeGallery(false)} />
+        )}
 
         {/* Clear confirmation dialog */}
         {showClearConfirm && (
