@@ -241,11 +241,14 @@ export const useGameStore = create<GameState>((set, get) => ({
 
     set((s) => ({ sentencesToday: s.sentencesToday + 1 }));
 
-    checkBadges().then((newlyEarned) => {
-      if (newlyEarned.length > 0) {
-        set({ newlyEarnedBadges: newlyEarned, showBadgeCelebration: true });
-      }
-    });
+    // Only check badges if the sentence was grammatically correct
+    if (tier1.result === 'correct') {
+      checkBadges().then((newlyEarned) => {
+        if (newlyEarned.length > 0) {
+          set({ newlyEarnedBadges: newlyEarned, showBadgeCelebration: true });
+        }
+      });
+    }
   },
 
   clearFeedback: () => set({ feedback: null }),
