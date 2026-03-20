@@ -18,6 +18,7 @@ import { FeedbackOverlay } from './FeedbackOverlay';
 import { BadgeCelebration } from './BadgeCelebration';
 import { BadgeGallery } from './BadgeGallery';
 import { WordTileComponent } from './WordTileComponent';
+import { useTTS } from '../hooks/useTTS';
 import { fetchTodayCount } from '../lib/api';
 import type { WordTile } from '../types';
 
@@ -40,6 +41,8 @@ export function SentenceBuilder() {
   const sentencesToday = useGameStore((s) => s.sentencesToday);
   const setSentencesToday = useGameStore((s) => s.setSentencesToday);
   const showBadgeCelebration = useGameStore((s) => s.showBadgeCelebration);
+
+  const { speak } = useTTS();
 
   const [activeTile, setActiveTile] = useState<WordTile | null>(null);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
@@ -103,6 +106,14 @@ export function SentenceBuilder() {
     },
     [addToTray, removeFromTray, reorderTray]
   );
+
+  const handleSubmit = useCallback(() => {
+    if (!language || sentenceTray.length < 3) return;
+    // Capture the tray before submit (in case it gets cleared on correct)
+    const tilesToSpeak = [...sentenceTray];
+    submitSentence();
+    speak(tilesToSpeak, language);
+  }, [language, sentenceTray, submitSentence, speak]);
 
   const handleClearAll = () => {
     if (sentenceTray.length >= 3) {
@@ -185,7 +196,7 @@ export function SentenceBuilder() {
           </div>
 
           <button
-            onClick={submitSentence}
+            onClick={handleSubmit}
             disabled={sentenceTray.length < 3}
             className={`
               px-4 md:px-6 py-2 rounded-full font-bold text-sm md:text-base
