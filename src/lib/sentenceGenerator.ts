@@ -97,15 +97,16 @@ const TEMPLATES: Record<Language, SentenceTemplate[]> = {
     { slots: ['pronoun', 'verb_trans', 'det', 'adj', 'noun'] },        // I like the big dog
   ],
   fr: [
-    // Intransitive
+    // Intransitive (FR nouns already include their article, e.g. "le chat")
     { slots: ['noun', 'verb_intrans'] },                                // Le chat court
-    { slots: ['noun', 'verb_intrans', 'adv'] },                        // Le garcon chante bien
-    { slots: ['det', 'adj', 'noun', 'verb_intrans'] },                 // Un grand chien saute
+    { slots: ['noun', 'verb_intrans', 'adv'] },                        // Le garçon chante bien
+    { slots: ['noun', 'adj', 'verb_intrans'] },                        // Le chat rouge court
     // Transitive
     { slots: ['noun', 'verb_trans', 'noun'] },                         // La fille mange la pomme
     { slots: ['noun', 'verb_trans', 'prep', 'noun'] },                 // Le chat cache dans la maison
     // Copula (est can stand alone with adj)
     { slots: ['noun', 'verb', 'adj'] },                                // Le chat est petit
+    { slots: ['noun', 'verb', 'adv', 'adj'] },                        // Le chat est très petit
   ],
   'zh-Hans': [
     // Intransitive
