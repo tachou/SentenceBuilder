@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import multer from 'multer';
 import { query, queryOne, run, runChanges, persist } from '../db.js';
+import { detectPos } from '../posLookup.js';
 
 const router = Router();
 
@@ -16,7 +17,7 @@ interface ParsedWord {
   phonetic?: string;
 }
 
-function parseCSV(content: string): { words: ParsedWord[]; language?: string } {
+function parseCSV(content: string, targetLanguage?: string): { words: ParsedWord[]; language?: string } {
   const lines = content.trim().split(/\r?\n/);
   if (lines.length < 2) throw new Error('CSV must have a header row and at least one data row');
 
@@ -26,8 +27,8 @@ function parseCSV(content: string): { words: ParsedWord[]; language?: string } {
   const langIdx = header.findIndex(h => h === 'language_code' || h === 'lang' || h === 'language');
   const phoneticIdx = header.findIndex(h => h === 'pinyin' || h === 'phonetic');
 
-  if (wordIdx === -1 || posIdx === -1) {
-    throw new Error('CSV must have "word" and "part_of_speech" (or "pos") columns');
+  if (wordIdx === -1) {
+    throw new Error('CSV must have a "word" column');
   }
 
   let language: string | undefined;
@@ -42,7 +43,7 @@ function parseCSV(content: string): { words: ParsedWord[]; language?: string } {
 
     words.push({
       word: cols[wordIdx],
-      pos: cols[posIdx]?.toLowerCase(),
+      pos: posIdx >= 0 ? (cols[posIdx]?.toLowerCase() || detectPos(cols[wordIdx], targetLanguage || language)) : detectPos(cols[wordIdx], targetLanguage || language),
       phonetic: (phoneticIdx >= 0 ? cols[phoneticIdx] : undefined) || undefined,
     });
   }
@@ -50,16 +51,17 @@ function parseCSV(content: string): { words: ParsedWord[]; language?: string } {
   return { words, language };
 }
 
-function parseJSON(content: string): { words: ParsedWord[]; language?: string } {
+function parseJSON(content: string, targetLanguage?: string): { words: ParsedWord[]; language?: string } {
   const data = JSON.parse(content);
 
   if (Array.isArray(data)) {
-    return { words: data.map((d: ParsedWord) => ({ word: d.word, pos: d.pos, phonetic: d.phonetic })) };
+    return { words: data.map((d: ParsedWord) => ({ word: d.word, pos: d.pos || detectPos(d.word, targetLanguage), phonetic: d.phonetic })) };
   }
 
   if (data.words && Array.isArray(data.words)) {
+    const lang = data.language || targetLanguage;
     return {
-      words: data.words.map((d: ParsedWord) => ({ word: d.word, pos: d.pos, phonetic: d.phonetic })),
+      words: data.words.map((d: ParsedWord) => ({ word: d.word, pos: d.pos || detectPos(d.word, lang), phonetic: d.phonetic })),
       language: data.language,
     };
   }
@@ -110,9 +112,9 @@ router.post('/upload', upload.single('file'), (req, res) => {
     const ext = file.originalname?.toLowerCase() || '';
 
     if (ext.endsWith('.json') || file.mimetype === 'application/json') {
-      parsed = parseJSON(content);
+      parsed = parseJSON(content, requestLang);
     } else {
-      parsed = parseCSV(content);
+      parsed = parseCSV(content, requestLang);
     }
 
     const result = validateWords(parsed, requestLang);
