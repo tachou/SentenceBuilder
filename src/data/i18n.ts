@@ -83,6 +83,12 @@ export interface LocaleStrings {
   badgeStreak10Desc: string;
   badgeDaily5: string;
   badgeDaily5Desc: string;
+  // Help
+  helpButton: string;
+  helpTitle: string;
+  showAll: string;
+  nSentences: string;
+  noSentences: string;
 }
 
 const locales: Record<Language, LocaleStrings> = {
@@ -165,6 +171,11 @@ const locales: Record<Language, LocaleStrings> = {
     badgeStreak10Desc: '10 correct in a row!',
     badgeDaily5: 'Busy Builder',
     badgeDaily5Desc: '5 sentences in one day!',
+    helpButton: 'Help',
+    helpTitle: "Here's a sentence you can make!",
+    showAll: 'Show All',
+    nSentences: 'sentences found',
+    noSentences: 'These tiles are tricky! Try dragging some to the tray.',
   },
   fr: {
     appTitle: 'SentenceBuilder',
@@ -245,6 +256,11 @@ const locales: Record<Language, LocaleStrings> = {
     badgeStreak10Desc: '10 correctes de suite !',
     badgeDaily5: 'Constructeur assidu',
     badgeDaily5Desc: '5 phrases en un jour !',
+    helpButton: 'Aide',
+    helpTitle: 'Voici une phrase possible !',
+    showAll: 'Tout afficher',
+    nSentences: 'phrases trouvées',
+    noSentences: 'Ces tuiles sont difficiles ! Essaie d\u2019en glisser dans le plateau.',
   },
   'zh-Hans': {
     appTitle: 'SentenceBuilder',
@@ -325,6 +341,11 @@ const locales: Record<Language, LocaleStrings> = {
     badgeStreak10Desc: '\u8fde\u7eed10\u53e5\u6b63\u786e\uff01',
     badgeDaily5: '\u52e4\u594b\u5efa\u9020\u8005',
     badgeDaily5Desc: '\u4e00\u5929\u5185\u9020\u4e865\u53e5\uff01',
+    helpButton: '\u5e2e\u52a9',
+    helpTitle: '\u8fd9\u662f\u4f60\u53ef\u4ee5\u9020\u7684\u53e5\u5b50\uff01',
+    showAll: '\u663e\u793a\u5168\u90e8',
+    nSentences: '\u4e2a\u53e5\u5b50',
+    noSentences: '\u8fd9\u4e9b\u5b57\u5757\u6709\u70b9\u96be\uff01\u8bd5\u8bd5\u628a\u4e00\u4e9b\u62d6\u5230\u6258\u76d8\u91cc\u3002',
   },
 };
 

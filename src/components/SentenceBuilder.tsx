@@ -19,7 +19,9 @@ import { BadgeCelebration } from './BadgeCelebration';
 import { BadgeGallery } from './BadgeGallery';
 import { WordTileComponent } from './WordTileComponent';
 import { useTTS } from '../hooks/useTTS';
+import { generateSentences } from '../lib/sentenceGenerator';
 import { fetchTodayCount } from '../lib/api';
+import { POS_COLORS } from '../types';
 import type { WordTile } from '../types';
 
 export function SentenceBuilder() {
@@ -38,6 +40,7 @@ export function SentenceBuilder() {
   const showPos = useGameStore((s) => s.showPos);
   const togglePos = useGameStore((s) => s.togglePos);
 
+  const wordPool = useGameStore((s) => s.wordPool);
   const sentencesToday = useGameStore((s) => s.sentencesToday);
   const setSentencesToday = useGameStore((s) => s.setSentencesToday);
   const showBadgeCelebration = useGameStore((s) => s.showBadgeCelebration);
@@ -47,6 +50,8 @@ export function SentenceBuilder() {
   const [activeTile, setActiveTile] = useState<WordTile | null>(null);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [showBadgeGallery, setShowBadgeGallery] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
+  const [showAllSentences, setShowAllSentences] = useState(false);
 
   const locale = t(uiLanguage);
 
@@ -242,6 +247,15 @@ export function SentenceBuilder() {
             >
               {'\ud83d\udd04'}
             </button>
+
+            <button
+              onClick={() => { setShowHelp(true); setShowAllSentences(false); }}
+              className="p-2.5 rounded-full bg-white/80 hover:bg-white shadow-sm hover:shadow text-gray-500 hover:text-amber-500 transition-all min-w-[44px] min-h-[44px] flex items-center justify-center text-lg"
+              aria-label={locale.helpButton}
+              title={locale.helpButton}
+            >
+              {'\ud83d\udca1'}
+            </button>
           </nav>
         </main>
 
@@ -266,6 +280,91 @@ export function SentenceBuilder() {
             </span>
           ))}
         </footer>
+
+        {/* Help popup */}
+        {showHelp && language && (() => {
+          const allTiles = [...wordPool, ...sentenceTray];
+          const sentences = generateSentences(allTiles, language);
+          return (
+            <div
+              className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4"
+              onClick={() => setShowHelp(false)}
+            >
+              <div
+                className="bg-white rounded-3xl p-6 shadow-2xl max-w-lg w-full text-center relative max-h-[70vh] flex flex-col"
+                onClick={(e) => e.stopPropagation()}
+                role="dialog"
+                aria-modal="true"
+                aria-label={locale.helpTitle}
+              >
+                {/* Close button */}
+                <button
+                  onClick={() => setShowHelp(false)}
+                  className="absolute top-3 right-4 text-gray-400 hover:text-gray-600 text-2xl font-bold min-w-[36px] min-h-[36px]"
+                  aria-label={locale.close}
+                >
+                  {'\u2715'}
+                </button>
+
+                <h2 className="text-lg font-bold text-purple-700 mb-4 pr-8">
+                  {locale.helpTitle}
+                </h2>
+
+                {sentences.length === 0 ? (
+                  <p className="text-gray-500 text-base">{locale.noSentences}</p>
+                ) : !showAllSentences ? (
+                  /* Single sentence view */
+                  <div>
+                    <p className="text-xl leading-relaxed mb-6 flex flex-wrap gap-1.5 justify-center">
+                      {sentences[0].tiles.map((tile, i) => (
+                        <span
+                          key={i}
+                          className={`${POS_COLORS[tile.pos].bg} px-2 py-1 rounded-lg font-semibold`}
+                        >
+                          {tile.word}
+                        </span>
+                      ))}
+                    </p>
+                    {sentences.length > 1 && (
+                      <button
+                        onClick={() => setShowAllSentences(true)}
+                        className="px-5 py-2 rounded-full bg-purple-500 text-white font-bold hover:bg-purple-600 transition-colors text-sm"
+                      >
+                        {locale.showAll} ({sentences.length} {locale.nSentences})
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  /* All sentences view */
+                  <div className="flex flex-col min-h-0">
+                    <p className="text-sm text-gray-500 mb-3 font-medium">
+                      {sentences.length} {locale.nSentences}
+                    </p>
+                    <ol className="overflow-y-auto text-left space-y-2 pr-1">
+                      {sentences.map((s, i) => (
+                        <li key={i} className="flex items-start gap-2">
+                          <span className="text-gray-400 text-sm font-mono mt-1 shrink-0 w-6 text-right">
+                            {i + 1}.
+                          </span>
+                          <span className="flex flex-wrap gap-1">
+                            {s.tiles.map((tile, j) => (
+                              <span
+                                key={j}
+                                className={`${POS_COLORS[tile.pos].bg} px-1.5 py-0.5 rounded text-sm font-medium`}
+                              >
+                                {tile.word}
+                              </span>
+                            ))}
+                          </span>
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Badge Celebration */}
         {showBadgeCelebration && <BadgeCelebration />}
