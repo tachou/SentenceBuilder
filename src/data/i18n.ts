@@ -6,6 +6,7 @@ export interface LocaleStrings {
   instructionLanguage: string;
   tapToStart: string;
   pinyinToggle: string;
+  posToggle: string;
   play: string;
   submit: string;
   clearAll: string;
@@ -91,6 +92,7 @@ const locales: Record<Language, LocaleStrings> = {
     instructionLanguage: 'Instructions in:',
     tapToStart: 'Tap a tile to start building sentences!',
     pinyinToggle: 'Pinyin',
+    posToggle: 'POS',
     play: 'Play',
     submit: 'Submit',
     clearAll: 'Clear All',
@@ -170,6 +172,7 @@ const locales: Record<Language, LocaleStrings> = {
     instructionLanguage: 'Instructions en :',
     tapToStart: 'Appuie sur un mot pour construire des phrases !',
     pinyinToggle: 'Pinyin',
+    posToggle: 'POS',
     play: 'Jouer',
     submit: 'Valider',
     clearAll: 'Tout effacer',
@@ -249,6 +252,7 @@ const locales: Record<Language, LocaleStrings> = {
     instructionLanguage: '\u6307\u5bfc\u8bed\u8a00\uff1a',
     tapToStart: '\u70b9\u51fb\u8bcd\u8bed\u5f00\u59cb\u9020\u53e5\uff01',
     pinyinToggle: '\u62fc\u97f3',
+    posToggle: '\u8bcd\u6027',
     play: '\u64ad\u653e',
     submit: '\u63d0\u4ea4',
     clearAll: '\u5168\u90e8\u6e05\u9664',

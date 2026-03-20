@@ -41,6 +41,7 @@ interface GameState {
   isPlaying: boolean;
   highlightedTileIndex: number | null;
   showPinyin: boolean;
+  showPos: boolean;
   highContrast: boolean;
   parentPin: string;
   ttsProvider: 'browser' | 'cloud';
@@ -70,6 +71,7 @@ interface GameState {
   setIsPlaying: (playing: boolean) => void;
   setHighlightedTileIndex: (index: number | null) => void;
   togglePinyin: () => void;
+  togglePos: () => void;
   setHighContrast: (on: boolean) => void;
   setParentPin: (pin: string) => void;
   setTTSProvider: (provider: 'browser' | 'cloud') => void;
@@ -126,6 +128,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   isPlaying: false,
   highlightedTileIndex: null,
   showPinyin: true,
+  showPos: true,
   highContrast: persisted.highContrast || false,
   parentPin: persisted.parentPin || '1234',
   ttsProvider: persisted.ttsProvider || 'browser',
@@ -255,6 +258,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   setIsPlaying: (playing) => set({ isPlaying: playing }),
   setHighlightedTileIndex: (index) => set({ highlightedTileIndex: index }),
   togglePinyin: () => set((s) => ({ showPinyin: !s.showPinyin })),
+  togglePos: () => set((s) => ({ showPos: !s.showPos })),
 
   setHighContrast: (on) => {
     set({ highContrast: on });

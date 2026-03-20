@@ -34,6 +34,8 @@ export function SentenceBuilder() {
   const uiLanguage = useGameStore((s) => s.uiLanguage);
   const showPinyin = useGameStore((s) => s.showPinyin);
   const togglePinyin = useGameStore((s) => s.togglePinyin);
+  const showPos = useGameStore((s) => s.showPos);
+  const togglePos = useGameStore((s) => s.togglePos);
 
   const sentencesToday = useGameStore((s) => s.sentencesToday);
   const setSentencesToday = useGameStore((s) => s.setSentencesToday);
@@ -164,6 +166,22 @@ export function SentenceBuilder() {
                 {locale.pinyinToggle}
               </button>
             )}
+            <button
+              onClick={togglePos}
+              className={`
+                px-2.5 py-1 rounded-full text-xs font-bold
+                min-h-[36px] transition-all duration-200
+                ${showPos
+                  ? 'bg-purple-500 text-white shadow-sm'
+                  : 'bg-gray-200 text-gray-500 hover:bg-gray-300'
+                }
+              `}
+              role="switch"
+              aria-checked={showPos}
+              aria-label={showPos ? 'Hide part of speech' : 'Show part of speech'}
+            >
+              {locale.posToggle}
+            </button>
           </div>
 
           <button
