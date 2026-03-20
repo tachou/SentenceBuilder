@@ -102,24 +102,10 @@ export function LanguageSelection() {
             <span className="text-2xl md:text-3xl font-bold text-gray-700">
               {lang.native}
             </span>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowUploadPinGate(true);
-              }}
-              className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/80 hover:bg-white shadow-sm flex items-center justify-center text-sm text-gray-500 hover:text-blue-600 transition-all opacity-0 group-hover:opacity-100"
-              aria-label={locale.uploadWordList}
-              title={locale.uploadWordList}
-            >
-              {'\u2b06'}
-            </button>
           </div>
         ))}
       </div>
 
-      <p className="mt-10 text-sm text-purple-400">
-        {locale.tapToStart}
-      </p>
 
       {/* PIN Gate */}
       {showPinGate && (
