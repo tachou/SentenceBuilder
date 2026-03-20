@@ -49,6 +49,39 @@ const TRANSITIVE_ZH = new Set([
   '给', '要', '找', '藏', '扔', '接', '建', '帮助', '开', '关', '骑',
 ]);
 
+/**
+ * French gender agreement data.
+ * Feminine nouns start with "la " or are known feminine.
+ * Gender-invariant adjectives end in -e and work with both genders.
+ */
+const FEMININE_NOUNS_FR = new Set([
+  'la maison', "l'école", 'la balle', 'la voiture', 'la fille',
+  "l'étoile", 'la fleur', 'la pomme', "l'eau", 'la grenouille',
+  'la chaussure', 'la poule', 'la pizza', 'la pluie', 'la neige',
+  'la reine', 'la classe', 'la lune', 'maman',
+]);
+const ADJ_GENDER_INVARIANT_FR = new Set([
+  // Adjectives already ending in -e: same form for masculine/feminine
+  'rouge', 'triste', 'rapide', 'drôle', 'calme', 'jaune',
+  'orange', 'brave', 'minuscule',
+]);
+
+/** Check if a French combo has gender agreement issues */
+function hasFrenchGenderConflict(combo: WordTile[], slots: SlotType[]): boolean {
+  let nounWord: string | null = null;
+  let adjWord: string | null = null;
+  for (let i = 0; i < slots.length; i++) {
+    if (slots[i] === 'noun') nounWord = combo[i].word;
+    if (slots[i] === 'adj') adjWord = combo[i].word;
+  }
+  if (!nounWord || !adjWord) return false;
+  // Feminine noun + masculine-only adjective = conflict
+  if (FEMININE_NOUNS_FR.has(nounWord) && !ADJ_GENDER_INVARIANT_FR.has(adjWord)) {
+    return true;
+  }
+  return false;
+}
+
 function getIntransitiveSet(lang: Language): Set<string> {
   return lang === 'fr' ? INTRANSITIVE_FR : lang === 'zh-Hans' ? INTRANSITIVE_ZH : INTRANSITIVE_EN;
 }
@@ -166,6 +199,9 @@ export function generateSentences(tiles: WordTile[], lang: Language): GeneratedS
       // Ensure no tile is used twice (by instanceId)
       const ids = combo.map(t => t.instanceId);
       if (new Set(ids).size !== ids.length) continue;
+
+      // French gender agreement check
+      if (lang === 'fr' && hasFrenchGenderConflict(combo, template.slots)) continue;
 
       const joiner = lang === 'zh-Hans' ? '' : ' ';
       const sentence = combo.map(t => t.word).join(joiner);
