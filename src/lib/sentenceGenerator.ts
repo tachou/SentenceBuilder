@@ -1,7 +1,7 @@
 import type { Language, WordTile } from '../types';
 
 /** A slot type that a template position can accept */
-type SlotType = 'det' | 'noun' | 'verb_copula' | 'verb_intrans' | 'verb_trans' | 'adj' | 'adv' | 'prep' | 'pronoun' | 'particle';
+type SlotType = 'det' | 'noun' | 'verb_copula' | 'verb_intrans' | 'verb_trans' | 'adj' | 'adv' | 'adv_intensifier' | 'prep' | 'pronoun' | 'particle';
 
 /** Map slot types to the tile filter logic */
 const DETERMINERS = new Set(['the', 'a', 'my', 'some', 'many', 'un', 'une', 'des', 'du', 'de la', 'le', 'la', '一个', '这个', '那个', '一些', '很多']);
@@ -10,6 +10,11 @@ const PREPOSITIONS_EN = new Set(['in the', 'on the', 'to the', 'with a', 'at the
 const PREPOSITIONS_FR = new Set(['dans', 'sur', 'avec', 'pour', 'sous', 'à côté de', 'devant', 'derrière', 'au-dessus de', 'près de', 'autour de', 'vers', 'entre']);
 const PREPOSITIONS_ZH = new Set(['在', '到']);
 const PARTICLES_ZH = new Set(['的', '了']);
+
+/** Intensifier adverbs — safe to use in copula templates (noun est très adj) */
+const INTENSIFIERS_FR = new Set(['très', 'vraiment', 'bien']);
+const INTENSIFIERS_EN = new Set(['very', 'really']);
+const INTENSIFIERS_ZH = new Set(['很', '真']);
 
 /** Copula verbs — link subject to adjective/description */
 const COPULA_EN = new Set(['is']);
@@ -41,7 +46,7 @@ const TRANSITIVE_EN = new Set([
 ]);
 const TRANSITIVE_FR = new Set([
   'mange', 'boit', 'voit', 'aime', 'adore', 'lit',
-  'cuisine', 'dessine', 'fait', 'donne', 'veut', 'trouve',
+  'cuisine', 'dessine', 'fait', 'veut', 'trouve',
   'lance', 'attrape', 'construit', 'aide', 'ouvre', 'ferme', 'porte', 'regarde',
 ]);
 const TRANSITIVE_ZH = new Set([
@@ -112,6 +117,10 @@ function getTilesForSlot(tiles: WordTile[], slot: SlotType, lang: Language): Wor
       return tiles.filter(t => t.pos === 'adjective');
     case 'adv':
       return tiles.filter(t => t.pos === 'adverb');
+    case 'adv_intensifier': {
+      const intensifiers = lang === 'fr' ? INTENSIFIERS_FR : lang === 'zh-Hans' ? INTENSIFIERS_ZH : INTENSIFIERS_EN;
+      return tiles.filter(t => t.pos === 'adverb' && intensifiers.has(t.word));
+    }
     case 'pronoun':
       return tiles.filter(t => PRONOUNS.has(t.word));
     case 'particle':
@@ -144,12 +153,11 @@ const TEMPLATES: Record<Language, SentenceTemplate[]> = {
     // Intransitive (FR nouns already include their article, e.g. "le chat")
     { slots: ['noun', 'verb_intrans'] },                                // Le chat court
     { slots: ['noun', 'verb_intrans', 'adv'] },                        // Le garçon chante bien
-    { slots: ['noun', 'adj', 'verb_intrans'] },                        // Le chat rouge court
     // Transitive (direct object only, no preposition)
     { slots: ['noun', 'verb_trans', 'noun'] },                         // La fille mange la pomme
     // Copula (only "est")
     { slots: ['noun', 'verb_copula', 'adj'] },                         // Le chat est petit
-    { slots: ['noun', 'verb_copula', 'adv', 'adj'] },                  // Le chat est très petit
+    { slots: ['noun', 'verb_copula', 'adv_intensifier', 'adj'] },      // Le chat est très petit
   ],
   'zh-Hans': [
     // Intransitive
