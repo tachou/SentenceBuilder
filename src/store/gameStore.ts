@@ -251,6 +251,11 @@ export const useGameStore = create<GameState>((set, get) => ({
           set({ newlyEarnedBadges: newlyEarned, showBadgeCelebration: true });
         }
       });
+
+      // Auto-advance to a new round after a short delay
+      setTimeout(() => {
+        get().startNewRound();
+      }, 2000);
     }
   },
 
