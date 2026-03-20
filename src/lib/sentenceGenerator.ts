@@ -1,7 +1,7 @@
 import type { Language, WordTile } from '../types';
 
 /** A slot type that a template position can accept */
-type SlotType = 'det' | 'noun' | 'verb' | 'adj' | 'adv' | 'prep' | 'pronoun' | 'particle';
+type SlotType = 'det' | 'noun' | 'verb' | 'verb_intrans' | 'verb_trans' | 'adj' | 'adv' | 'prep' | 'pronoun' | 'particle';
 
 /** Map slot types to the tile filter logic */
 const DETERMINERS = new Set(['the', 'a', 'my', 'some', 'many', 'un', 'une', 'des', 'du', 'de la', 'le', 'la', '一个', '这个', '那个', '一些', '很多']);
@@ -11,6 +11,43 @@ const PREPOSITIONS_FR = new Set(['dans', 'sur', 'avec', 'pour', 'sous', 'à côt
 const PREPOSITIONS_ZH = new Set(['在', '到']);
 const PARTICLES_ZH = new Set(['的', '了']);
 
+/** Intransitive verbs — can stand alone without an object */
+const INTRANSITIVE_EN = new Set([
+  'runs', 'jumps', 'sleeps', 'walks', 'sings', 'dances', 'flies',
+  'swims', 'climbs', 'sits', 'stands', 'plays', 'grows', 'hides',
+]);
+const INTRANSITIVE_FR = new Set([
+  'court', 'saute', 'dort', 'marche', 'chante', 'danse', 'vole',
+  'nage', 'grimpe', 'joue', 'parle', 'pousse',
+]);
+const INTRANSITIVE_ZH = new Set([
+  '跑', '跳', '飞', '游泳', '走', '坐', '站', '睡觉', '唱歌', '跳舞', '爬', '长',
+]);
+
+/** Transitive verbs — require an object to form a complete sentence */
+const TRANSITIVE_EN = new Set([
+  'eats', 'drinks', 'sees', 'likes', 'loves', 'has', 'reads',
+  'cooks', 'draws', 'makes', 'gives', 'wants', 'finds', 'throws',
+  'catches', 'builds', 'helps', 'opens', 'closes', 'rides',
+]);
+const TRANSITIVE_FR = new Set([
+  'mange', 'boit', 'voit', 'aime', 'adore', 'a', 'lit',
+  'cuisine', 'dessine', 'fait', 'donne', 'veut', 'trouve',
+  'lance', 'attrape', 'construit', 'aide', 'ouvre', 'ferme', 'porte', 'regarde',
+]);
+const TRANSITIVE_ZH = new Set([
+  '吃', '喝', '看', '喜欢', '爱', '有', '读', '做饭', '画画',
+  '给', '要', '找', '藏', '扔', '接', '建', '帮助', '开', '关', '骑',
+]);
+
+function getIntransitiveSet(lang: Language): Set<string> {
+  return lang === 'fr' ? INTRANSITIVE_FR : lang === 'zh-Hans' ? INTRANSITIVE_ZH : INTRANSITIVE_EN;
+}
+
+function getTransitiveSet(lang: Language): Set<string> {
+  return lang === 'fr' ? TRANSITIVE_FR : lang === 'zh-Hans' ? TRANSITIVE_ZH : TRANSITIVE_EN;
+}
+
 function getTilesForSlot(tiles: WordTile[], slot: SlotType, lang: Language): WordTile[] {
   switch (slot) {
     case 'det':
@@ -19,6 +56,14 @@ function getTilesForSlot(tiles: WordTile[], slot: SlotType, lang: Language): Wor
       return tiles.filter(t => t.pos === 'noun');
     case 'verb':
       return tiles.filter(t => t.pos === 'verb');
+    case 'verb_intrans': {
+      const intrans = getIntransitiveSet(lang);
+      return tiles.filter(t => t.pos === 'verb' && intrans.has(t.word));
+    }
+    case 'verb_trans': {
+      const trans = getTransitiveSet(lang);
+      return tiles.filter(t => t.pos === 'verb' && trans.has(t.word));
+    }
     case 'adj':
       return tiles.filter(t => t.pos === 'adjective');
     case 'adv':
@@ -40,31 +85,39 @@ interface SentenceTemplate {
 
 const TEMPLATES: Record<Language, SentenceTemplate[]> = {
   en: [
-    { slots: ['det', 'noun', 'verb'] },                    // The cat runs
-    { slots: ['det', 'noun', 'verb', 'det', 'noun'] },     // The dog eats a cookie
-    { slots: ['det', 'adj', 'noun', 'verb'] },              // The big bird flies
-    { slots: ['det', 'adj', 'noun', 'verb', 'adv'] },       // The fast horse runs quickly
-    { slots: ['det', 'noun', 'verb', 'adv'] },              // The cat sleeps quietly
-    { slots: ['det', 'noun', 'verb', 'prep', 'noun'] },     // The fish swims in the water
-    { slots: ['pronoun', 'verb', 'det', 'noun'] },           // I see the moon
-    { slots: ['pronoun', 'verb', 'det', 'adj', 'noun'] },    // I like the big dog
+    // Intransitive: no object needed
+    { slots: ['det', 'noun', 'verb_intrans'] },                        // The cat runs
+    { slots: ['det', 'adj', 'noun', 'verb_intrans'] },                 // The big bird flies
+    { slots: ['det', 'noun', 'verb_intrans', 'adv'] },                 // The cat sleeps quietly
+    { slots: ['det', 'adj', 'noun', 'verb_intrans', 'adv'] },          // The fast horse runs quickly
+    // Transitive: require an object
+    { slots: ['det', 'noun', 'verb_trans', 'det', 'noun'] },           // The dog eats a cookie
+    { slots: ['det', 'noun', 'verb_trans', 'prep', 'noun'] },          // The cat hides in the house
+    { slots: ['pronoun', 'verb_trans', 'det', 'noun'] },               // I see the moon
+    { slots: ['pronoun', 'verb_trans', 'det', 'adj', 'noun'] },        // I like the big dog
   ],
   fr: [
-    { slots: ['noun', 'verb'] },                             // Le chat court (nouns include article)
-    { slots: ['noun', 'verb', 'noun'] },                     // La fille mange la pomme
-    { slots: ['noun', 'verb', 'adv'] },                      // Le garçon chante bien
-    { slots: ['noun', 'verb', 'adj'] },                      // Le chat est petit
-    { slots: ['noun', 'verb', 'prep', 'noun'] },             // Le poisson nage dans la maison
-    { slots: ['det', 'adj', 'noun', 'verb'] },               // Un grand chien saute
+    // Intransitive
+    { slots: ['noun', 'verb_intrans'] },                                // Le chat court
+    { slots: ['noun', 'verb_intrans', 'adv'] },                        // Le garcon chante bien
+    { slots: ['det', 'adj', 'noun', 'verb_intrans'] },                 // Un grand chien saute
+    // Transitive
+    { slots: ['noun', 'verb_trans', 'noun'] },                         // La fille mange la pomme
+    { slots: ['noun', 'verb_trans', 'prep', 'noun'] },                 // Le chat cache dans la maison
+    // Copula (est can stand alone with adj)
+    { slots: ['noun', 'verb', 'adj'] },                                // Le chat est petit
   ],
   'zh-Hans': [
-    { slots: ['noun', 'verb'] },                             // 猫跑
-    { slots: ['noun', 'verb', 'noun'] },                     // 狗吃鱼
-    { slots: ['adj', 'particle', 'noun', 'verb'] },          // 大的猫跑
-    { slots: ['noun', 'adv', 'adj'] },                       // 猫很大
-    { slots: ['pronoun', 'verb', 'noun'] },                   // 我看书
-    { slots: ['noun', 'prep', 'noun', 'verb'] },             // 鸟在树飞
-    { slots: ['noun', 'verb', 'particle'] },                  // 猫跑了
+    // Intransitive
+    { slots: ['noun', 'verb_intrans'] },                                // 猫跑
+    { slots: ['adj', 'particle', 'noun', 'verb_intrans'] },            // 大的猫跑
+    { slots: ['noun', 'verb_intrans', 'particle'] },                   // 猫跑了
+    // Transitive
+    { slots: ['noun', 'verb_trans', 'noun'] },                         // 狗吃鱼
+    { slots: ['pronoun', 'verb_trans', 'noun'] },                      // 我看书
+    { slots: ['noun', 'prep', 'noun', 'verb_intrans'] },               // 鸟在树飞
+    // Adj predicate
+    { slots: ['noun', 'adv', 'adj'] },                                 // 猫很大
   ],
 };
 
