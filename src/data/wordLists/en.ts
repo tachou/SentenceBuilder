@@ -61,6 +61,9 @@ export const englishWords: WordEntry[] = [
   w('near the', 'phrase'), w('inside the', 'phrase'), w('around the', 'phrase'),
   w('from the', 'phrase'), w('some', 'phrase'), w('many', 'phrase'),
 
+  // Pronouns / Determiners (as phrases)
+  w('I', 'phrase'), w('my', 'phrase'),
+
   // Conjunctions (9)
   w('and', 'conjunction'), w('but', 'conjunction'), w('or', 'conjunction'),
   w('because', 'conjunction'), w('so', 'conjunction'), w('then', 'conjunction'),

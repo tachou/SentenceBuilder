@@ -81,6 +81,9 @@ export const chineseWords: WordEntry[] = [
   w('\u8f7b\u8f7b\u5730', 'adverb', 'q\u012bngq\u012bng de'), w('\u5728\u5916\u9762', 'adverb', 'z\u00e0i w\u00e0imi\u00e0n'),
   w('\u4e00\u8d77', 'adverb', 'y\u00ecq\u01d0'),
 
+  // Pronouns (as phrase)
+  w('\u6211', 'phrase', 'w\u01d2'),
+
   // Particles/Phrases (18)
   w('\u5728', 'phrase', 'z\u00e0i'), w('\u4e0a', 'phrase', 'sh\u00e0ng'),
   w('\u4e0b', 'phrase', 'xi\u00e0'), w('\u91cc', 'phrase', 'l\u01d0'),

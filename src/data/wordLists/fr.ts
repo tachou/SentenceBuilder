@@ -63,6 +63,7 @@ export const frenchWords: WordEntry[] = [
   w('une', 'phrase'), w('au-dessus de', 'phrase'), w('pr\u00e8s de', 'phrase'),
   w('autour de', 'phrase'), w('vers', 'phrase'), w('entre', 'phrase'),
   w('des', 'phrase'), w('du', 'phrase'), w('de la', 'phrase'),
+  w('le', 'phrase'), w('la', 'phrase'),
 
   // Conjunctions (9)
   w('et', 'conjunction'), w('mais', 'conjunction'), w('ou', 'conjunction'),

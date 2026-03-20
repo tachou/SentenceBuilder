@@ -3,7 +3,7 @@ import { useGameStore } from '../store/gameStore';
 import { DraggableTile } from './DraggableTile';
 import { t } from '../data/i18n';
 
-const MAX_TRAY = 7;
+const MAX_TRAY = 12;
 
 export function SentenceTray() {
   const sentenceTray = useGameStore((s) => s.sentenceTray);

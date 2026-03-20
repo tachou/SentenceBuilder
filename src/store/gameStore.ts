@@ -80,7 +80,7 @@ interface GameState {
   setSentencesToday: (count: number) => void;
 }
 
-const MAX_TRAY_SIZE = 7;
+const MAX_TRAY_SIZE = 12;
 
 function createTileInstances(words: WordEntry[]): WordTile[] {
   return words.map((w, i) => ({
@@ -112,9 +112,9 @@ function incrementUsage(
 
 function pickRoundWords(state: GameState, lang: Language): WordEntry[] {
   if (state.activeCustomListId && state.customWords.length > 0) {
-    return selectRoundWordsFromCustom(state.customWords, 14, state.wordUsageCount);
+    return selectRoundWordsFromCustom(state.customWords, 20, state.wordUsageCount, lang);
   }
-  return selectRoundWords(lang, 14, state.wordUsageCount);
+  return selectRoundWords(lang, 20, state.wordUsageCount);
 }
 
 export const useGameStore = create<GameState>((set, get) => ({
