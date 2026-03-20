@@ -1,7 +1,7 @@
 import type { Language, WordTile } from '../types';
 
 /** A slot type that a template position can accept */
-type SlotType = 'det' | 'noun' | 'verb' | 'verb_intrans' | 'verb_trans' | 'adj' | 'adv' | 'prep' | 'pronoun' | 'particle';
+type SlotType = 'det' | 'noun' | 'verb_copula' | 'verb_intrans' | 'verb_trans' | 'adj' | 'adv' | 'prep' | 'pronoun' | 'particle';
 
 /** Map slot types to the tile filter logic */
 const DETERMINERS = new Set(['the', 'a', 'my', 'some', 'many', 'un', 'une', 'des', 'du', 'de la', 'le', 'la', '一个', '这个', '那个', '一些', '很多']);
@@ -10,6 +10,15 @@ const PREPOSITIONS_EN = new Set(['in the', 'on the', 'to the', 'with a', 'at the
 const PREPOSITIONS_FR = new Set(['dans', 'sur', 'avec', 'pour', 'sous', 'à côté de', 'devant', 'derrière', 'au-dessus de', 'près de', 'autour de', 'vers', 'entre']);
 const PREPOSITIONS_ZH = new Set(['在', '到']);
 const PARTICLES_ZH = new Set(['的', '了']);
+
+/** Copula verbs — link subject to adjective/description */
+const COPULA_EN = new Set(['is']);
+const COPULA_FR = new Set(['est']);
+const COPULA_ZH = new Set(['是']);
+
+function getCopulaSet(lang: Language): Set<string> {
+  return lang === 'fr' ? COPULA_FR : lang === 'zh-Hans' ? COPULA_ZH : COPULA_EN;
+}
 
 /** Intransitive verbs — can stand alone without an object */
 const INTRANSITIVE_EN = new Set([
@@ -31,7 +40,7 @@ const TRANSITIVE_EN = new Set([
   'catches', 'builds', 'helps', 'opens', 'closes', 'rides',
 ]);
 const TRANSITIVE_FR = new Set([
-  'mange', 'boit', 'voit', 'aime', 'adore', 'a', 'lit',
+  'mange', 'boit', 'voit', 'aime', 'adore', 'lit',
   'cuisine', 'dessine', 'fait', 'donne', 'veut', 'trouve',
   'lance', 'attrape', 'construit', 'aide', 'ouvre', 'ferme', 'porte', 'regarde',
 ]);
@@ -54,8 +63,10 @@ function getTilesForSlot(tiles: WordTile[], slot: SlotType, lang: Language): Wor
       return tiles.filter(t => DETERMINERS.has(t.word));
     case 'noun':
       return tiles.filter(t => t.pos === 'noun');
-    case 'verb':
-      return tiles.filter(t => t.pos === 'verb');
+    case 'verb_copula': {
+      const copula = getCopulaSet(lang);
+      return tiles.filter(t => t.pos === 'verb' && copula.has(t.word));
+    }
     case 'verb_intrans': {
       const intrans = getIntransitiveSet(lang);
       return tiles.filter(t => t.pos === 'verb' && intrans.has(t.word));
@@ -101,12 +112,11 @@ const TEMPLATES: Record<Language, SentenceTemplate[]> = {
     { slots: ['noun', 'verb_intrans'] },                                // Le chat court
     { slots: ['noun', 'verb_intrans', 'adv'] },                        // Le garçon chante bien
     { slots: ['noun', 'adj', 'verb_intrans'] },                        // Le chat rouge court
-    // Transitive
+    // Transitive (direct object only, no preposition)
     { slots: ['noun', 'verb_trans', 'noun'] },                         // La fille mange la pomme
-    { slots: ['noun', 'verb_trans', 'prep', 'noun'] },                 // Le chat cache dans la maison
-    // Copula (est can stand alone with adj)
-    { slots: ['noun', 'verb', 'adj'] },                                // Le chat est petit
-    { slots: ['noun', 'verb', 'adv', 'adj'] },                        // Le chat est très petit
+    // Copula (only "est")
+    { slots: ['noun', 'verb_copula', 'adj'] },                         // Le chat est petit
+    { slots: ['noun', 'verb_copula', 'adv', 'adj'] },                  // Le chat est très petit
   ],
   'zh-Hans': [
     // Intransitive
