@@ -83,6 +83,9 @@ export interface LocaleStrings {
   badgeStreak10Desc: string;
   badgeDaily5: string;
   badgeDaily5Desc: string;
+  // Tap-to-hear
+  tapToHearOn: string;
+  tapToHearOff: string;
   // Help
   helpButton: string;
   helpTitle: string;
@@ -171,6 +174,8 @@ const locales: Record<Language, LocaleStrings> = {
     badgeStreak10Desc: '10 correct in a row!',
     badgeDaily5: 'Busy Builder',
     badgeDaily5Desc: '5 sentences in one day!',
+    tapToHearOn: 'Tap tiles to hear words',
+    tapToHearOff: 'Word sounds off',
     helpButton: 'Help',
     helpTitle: "Here's a sentence you can make!",
     showAll: 'Show All',
@@ -256,6 +261,8 @@ const locales: Record<Language, LocaleStrings> = {
     badgeStreak10Desc: '10 correctes de suite !',
     badgeDaily5: 'Constructeur assidu',
     badgeDaily5Desc: '5 phrases en un jour !',
+    tapToHearOn: 'Touche une tuile pour entendre le mot',
+    tapToHearOff: 'Sons désactivés',
     helpButton: 'Aide',
     helpTitle: 'Voici une phrase possible !',
     showAll: 'Tout afficher',
@@ -341,6 +348,8 @@ const locales: Record<Language, LocaleStrings> = {
     badgeStreak10Desc: '\u8fde\u7eed10\u53e5\u6b63\u786e\uff01',
     badgeDaily5: '\u52e4\u594b\u5efa\u9020\u8005',
     badgeDaily5Desc: '\u4e00\u5929\u5185\u9020\u4e865\u53e5\uff01',
+    tapToHearOn: '点击方块听发音',
+    tapToHearOff: '发音已关闭',
     helpButton: '\u5e2e\u52a9',
     helpTitle: '\u8fd9\u662f\u4f60\u53ef\u4ee5\u9020\u7684\u53e5\u5b50\uff01',
     showAll: '\u663e\u793a\u5168\u90e8',

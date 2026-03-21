@@ -3,6 +3,7 @@ import { CSS } from '@dnd-kit/utilities';
 import type { WordTile } from '../types';
 import { WordTileComponent } from './WordTileComponent';
 import { useGameStore } from '../store/gameStore';
+import { useTTS } from '../hooks/useTTS';
 
 interface DraggableTileProps {
   tile: WordTile;
@@ -17,6 +18,8 @@ export function DraggableTile({ tile, area, index }: DraggableTileProps) {
   const feedback = useGameStore((s) => s.feedback);
   const language = useGameStore((s) => s.language);
   const sentenceTray = useGameStore((s) => s.sentenceTray);
+  const tapToHearEnabled = useGameStore((s) => s.tapToHearEnabled);
+  const { speakWord } = useTTS();
 
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: tile.instanceId,
@@ -42,6 +45,9 @@ export function DraggableTile({ tile, area, index }: DraggableTileProps) {
         : undefined;
 
   const handleClick = () => {
+    if (tapToHearEnabled && language) {
+      speakWord(tile.word, language);
+    }
     if (area === 'pool') {
       addToTray(tile.instanceId);
     } else {

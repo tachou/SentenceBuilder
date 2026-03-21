@@ -143,6 +143,35 @@ export function useTTS() {
     [ttsProvider, speakBrowser, cloudTTS]
   );
 
+  /** Speak a single word aloud. Cancels any in-progress word utterance but
+   *  does NOT interrupt sentence-level TTS. */
+  const wordUtteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+
+  const speakWord = useCallback(
+    (word: string, lang: Language) => {
+      if (!window.speechSynthesis) return;
+
+      // If a full sentence is being played, don't interrupt it
+      const isPlaying = useGameStore.getState().isPlaying;
+      if (isPlaying) return;
+
+      // Cancel any previous word utterance
+      window.speechSynthesis.cancel();
+
+      const utterance = new SpeechSynthesisUtterance(word);
+      utterance.lang = LANG_MAP[lang];
+      utterance.rate = 0.9;
+      utterance.pitch = 1.1;
+
+      const cachedVoice = voiceCache[lang];
+      if (cachedVoice) utterance.voice = cachedVoice;
+
+      wordUtteranceRef.current = utterance;
+      window.speechSynthesis.speak(utterance);
+    },
+    []
+  );
+
   const stop = useCallback(() => {
     window.speechSynthesis.cancel();
     cloudTTS.stop();
@@ -150,5 +179,5 @@ export function useTTS() {
     setHighlightedTileIndex(null);
   }, [setIsPlaying, setHighlightedTileIndex, cloudTTS]);
 
-  return { speak, stop };
+  return { speak, speakWord, stop };
 }
