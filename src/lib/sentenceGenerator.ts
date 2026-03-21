@@ -74,6 +74,28 @@ const ADJ_GENDER_INVARIANT_FR = new Set([
   'orange', 'brave', 'minuscule',
 ]);
 
+/** English uncountable (mass) nouns — cannot use "a" as determiner */
+const UNCOUNTABLE_EN = new Set([
+  'water', 'rain', 'snow', 'music', 'food', 'milk', 'juice', 'bread',
+  'rice', 'grass', 'air', 'fire', 'ice', 'sand', 'dirt', 'mud',
+]);
+
+/** Check if an English combo has an uncountable noun with "a" */
+function hasEnglishUncountableConflict(combo: WordTile[], slots: SlotType[]): boolean {
+  for (let i = 0; i < slots.length - 1; i++) {
+    if (slots[i] === 'det' && combo[i].word === 'a') {
+      // Find the next noun slot after this det
+      for (let j = i + 1; j < slots.length; j++) {
+        if (slots[j] === 'noun') {
+          if (UNCOUNTABLE_EN.has(combo[j].word)) return true;
+          break;
+        }
+      }
+    }
+  }
+  return false;
+}
+
 /** Check if a French combo has gender agreement issues */
 function hasFrenchGenderConflict(combo: WordTile[], slots: SlotType[]): boolean {
   let nounWord: string | null = null;
@@ -151,9 +173,6 @@ const TEMPLATES: Record<Language, SentenceTemplate[]> = {
     { slots: ['det', 'adj', 'noun', 'verb_intrans', 'adv_manner'] },   // The fast horse runs quickly
     // Transitive: require an object
     { slots: ['det', 'noun', 'verb_trans', 'det', 'noun'] },           // The dog eats a cookie
-    { slots: ['det', 'noun', 'verb_trans', 'prep', 'noun'] },          // The cat hides in the house
-    { slots: ['pronoun', 'verb_trans', 'det', 'noun'] },               // I see the moon
-    { slots: ['pronoun', 'verb_trans', 'det', 'adj', 'noun'] },        // I like the big dog
   ],
   fr: [
     // Intransitive (FR nouns already include their article, e.g. "le chat")
@@ -214,8 +233,9 @@ export function generateSentences(tiles: WordTile[], lang: Language): GeneratedS
       const ids = combo.map(t => t.instanceId);
       if (new Set(ids).size !== ids.length) continue;
 
-      // French gender agreement check
+      // Language-specific agreement checks
       if (lang === 'fr' && hasFrenchGenderConflict(combo, template.slots)) continue;
+      if (lang === 'en' && hasEnglishUncountableConflict(combo, template.slots)) continue;
 
       const joiner = lang === 'zh-Hans' ? '' : ' ';
       const sentence = combo.map(t => t.word).join(joiner);
