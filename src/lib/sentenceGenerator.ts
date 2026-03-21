@@ -16,8 +16,14 @@ const INTENSIFIERS_FR = new Set(['très', 'vraiment', 'bien']);
 const INTENSIFIERS_EN = new Set(['very', 'really', 'too']);
 const INTENSIFIERS_ZH = new Set(['很', '真']);
 
-/** All intensifiers combined for exclusion from manner adverb slot */
-const ALL_INTENSIFIERS = new Set([...INTENSIFIERS_EN, ...INTENSIFIERS_FR, ...INTENSIFIERS_ZH]);
+/** Manner adverbs — adverbs that naturally modify verbs (whitelist approach) */
+const MANNER_EN = new Set([
+  'quickly', 'slowly', 'happily', 'loudly', 'softly', 'fast', 'well',
+  'outside', 'together', 'away',
+]);
+const MANNER_FR = new Set([
+  'bien', 'vite', 'doucement', 'ensemble', 'dehors', 'lentement', 'fort',
+]);
 
 /** Copula verbs — link subject to adjective/description */
 const COPULA_EN = new Set(['is']);
@@ -142,9 +148,11 @@ function getTilesForSlot(tiles: WordTile[], slot: SlotType, lang: Language): Wor
       return tiles.filter(t => t.pos === 'adjective');
     case 'adv':
       return tiles.filter(t => t.pos === 'adverb');
-    case 'adv_manner':
-      // Manner adverbs that modify verbs (excludes intensifiers like "very", "really")
-      return tiles.filter(t => t.pos === 'adverb' && !ALL_INTENSIFIERS.has(t.word));
+    case 'adv_manner': {
+      // Manner adverbs that naturally modify verbs (whitelist approach)
+      const manner = lang === 'fr' ? MANNER_FR : MANNER_EN;
+      return tiles.filter(t => t.pos === 'adverb' && manner.has(t.word));
+    }
     case 'adv_intensifier': {
       const intensifiers = lang === 'fr' ? INTENSIFIERS_FR : lang === 'zh-Hans' ? INTENSIFIERS_ZH : INTENSIFIERS_EN;
       return tiles.filter(t => t.pos === 'adverb' && intensifiers.has(t.word));
