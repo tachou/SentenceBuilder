@@ -1,7 +1,7 @@
 import type { Language, WordTile } from '../types';
 
 /** A slot type that a template position can accept */
-type SlotType = 'det' | 'noun' | 'verb_copula' | 'verb_intrans' | 'verb_trans' | 'adj' | 'adv' | 'adv_intensifier' | 'prep' | 'pronoun' | 'particle';
+type SlotType = 'det' | 'noun' | 'verb_copula' | 'verb_intrans' | 'verb_trans' | 'adj' | 'adv' | 'adv_manner' | 'adv_intensifier' | 'prep' | 'pronoun' | 'particle';
 
 /** Map slot types to the tile filter logic */
 const DETERMINERS = new Set(['the', 'a', 'my', 'some', 'many', 'un', 'une', 'des', 'du', 'de la', 'le', 'la', '一个', '这个', '那个', '一些', '很多']);
@@ -13,8 +13,11 @@ const PARTICLES_ZH = new Set(['的', '了']);
 
 /** Intensifier adverbs — safe to use in copula templates (noun est très adj) */
 const INTENSIFIERS_FR = new Set(['très', 'vraiment', 'bien']);
-const INTENSIFIERS_EN = new Set(['very', 'really']);
+const INTENSIFIERS_EN = new Set(['very', 'really', 'too']);
 const INTENSIFIERS_ZH = new Set(['很', '真']);
+
+/** All intensifiers combined for exclusion from manner adverb slot */
+const ALL_INTENSIFIERS = new Set([...INTENSIFIERS_EN, ...INTENSIFIERS_FR, ...INTENSIFIERS_ZH]);
 
 /** Copula verbs — link subject to adjective/description */
 const COPULA_EN = new Set(['is']);
@@ -117,6 +120,9 @@ function getTilesForSlot(tiles: WordTile[], slot: SlotType, lang: Language): Wor
       return tiles.filter(t => t.pos === 'adjective');
     case 'adv':
       return tiles.filter(t => t.pos === 'adverb');
+    case 'adv_manner':
+      // Manner adverbs that modify verbs (excludes intensifiers like "very", "really")
+      return tiles.filter(t => t.pos === 'adverb' && !ALL_INTENSIFIERS.has(t.word));
     case 'adv_intensifier': {
       const intensifiers = lang === 'fr' ? INTENSIFIERS_FR : lang === 'zh-Hans' ? INTENSIFIERS_ZH : INTENSIFIERS_EN;
       return tiles.filter(t => t.pos === 'adverb' && intensifiers.has(t.word));
@@ -141,8 +147,8 @@ const TEMPLATES: Record<Language, SentenceTemplate[]> = {
     // Intransitive: no object needed
     { slots: ['det', 'noun', 'verb_intrans'] },                        // The cat runs
     { slots: ['det', 'adj', 'noun', 'verb_intrans'] },                 // The big bird flies
-    { slots: ['det', 'noun', 'verb_intrans', 'adv'] },                 // The cat sleeps quietly
-    { slots: ['det', 'adj', 'noun', 'verb_intrans', 'adv'] },          // The fast horse runs quickly
+    { slots: ['det', 'noun', 'verb_intrans', 'adv_manner'] },            // The cat sleeps quietly
+    { slots: ['det', 'adj', 'noun', 'verb_intrans', 'adv_manner'] },   // The fast horse runs quickly
     // Transitive: require an object
     { slots: ['det', 'noun', 'verb_trans', 'det', 'noun'] },           // The dog eats a cookie
     { slots: ['det', 'noun', 'verb_trans', 'prep', 'noun'] },          // The cat hides in the house
@@ -152,7 +158,7 @@ const TEMPLATES: Record<Language, SentenceTemplate[]> = {
   fr: [
     // Intransitive (FR nouns already include their article, e.g. "le chat")
     { slots: ['noun', 'verb_intrans'] },                                // Le chat court
-    { slots: ['noun', 'verb_intrans', 'adv'] },                        // Le garçon chante bien
+    { slots: ['noun', 'verb_intrans', 'adv_manner'] },                  // Le garçon chante bien
     // Transitive (direct object only, no preposition)
     { slots: ['noun', 'verb_trans', 'noun'] },                         // La fille mange la pomme
     // Copula (only "est")
