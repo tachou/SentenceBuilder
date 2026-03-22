@@ -8,7 +8,7 @@ import {
   useSensors,
   closestCenter,
 } from '@dnd-kit/core';
-import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
+import type { DragEndEvent, DragStartEvent, DragOverEvent } from '@dnd-kit/core';
 import { useGameStore } from '../store/gameStore';
 import { t } from '../data/i18n';
 import { WordPool } from './WordPool';
@@ -51,6 +51,7 @@ export function SentenceBuilder() {
   const { speak } = useTTS();
 
   const [activeTile, setActiveTile] = useState<WordTile | null>(null);
+  const [insertPreviewIndex, setInsertPreviewIndex] = useState<number | null>(null);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [showBadgeGallery, setShowBadgeGallery] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
@@ -75,9 +76,30 @@ export function SentenceBuilder() {
     if (tile) setActiveTile(tile);
   }, []);
 
+  const handleDragOver = useCallback((event: DragOverEvent) => {
+    const { active, over } = event;
+    if (!over) {
+      setInsertPreviewIndex(null);
+      return;
+    }
+    const activeData = active.data.current;
+    const overData = over.data.current;
+
+    // Only show preview when dragging from pool over a tray tile
+    if (activeData?.area === 'pool' && overData?.area === 'tray') {
+      setInsertPreviewIndex(overData.index as number);
+    } else if (activeData?.area === 'pool' && over.id === 'sentence-tray') {
+      // Hovering over the tray background — show at end
+      setInsertPreviewIndex(sentenceTray.length);
+    } else {
+      setInsertPreviewIndex(null);
+    }
+  }, [sentenceTray.length]);
+
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
       setActiveTile(null);
+      setInsertPreviewIndex(null);
       const { active, over } = event;
       if (!over) return;
 
@@ -137,6 +159,7 @@ export function SentenceBuilder() {
       sensors={sensors}
       collisionDetection={closestCenter}
       onDragStart={handleDragStart}
+      onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
       <div className="h-screen bg-gradient-to-b from-sky-100 via-purple-50 to-pink-100 flex flex-col overflow-hidden">
@@ -280,7 +303,7 @@ export function SentenceBuilder() {
         </main>
 
         {/* Sentence Tray */}
-        <SentenceTray />
+        <SentenceTray insertPreviewIndex={insertPreviewIndex} />
 
         {/* Legend */}
         <footer className="flex flex-wrap gap-2 justify-center px-4 py-1 md:py-2 pb-2 md:pb-4 shrink-0" aria-label={locale.legend}>
