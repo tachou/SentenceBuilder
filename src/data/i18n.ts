@@ -96,7 +96,7 @@ export interface LocaleStrings {
 
 const locales: Record<Language, LocaleStrings> = {
   en: {
-    appTitle: 'SentenceBuilder',
+    appTitle: 'Silly Sentences',
     selectLanguage: 'Choose Your Language!',
     instructionLanguage: 'Instructions in:',
     tapToStart: 'Tap a tile to start building sentences!',
@@ -183,7 +183,7 @@ const locales: Record<Language, LocaleStrings> = {
     noSentences: 'These tiles are tricky! Try dragging some to the tray.',
   },
   fr: {
-    appTitle: 'SentenceBuilder',
+    appTitle: 'Silly Sentences',
     selectLanguage: 'Choisis ta langue !',
     instructionLanguage: 'Instructions en :',
     tapToStart: 'Appuie sur un mot pour construire des phrases !',
@@ -270,7 +270,7 @@ const locales: Record<Language, LocaleStrings> = {
     noSentences: 'Ces tuiles sont difficiles ! Essaie d\u2019en glisser dans le plateau.',
   },
   'zh-Hans': {
-    appTitle: 'SentenceBuilder',
+    appTitle: 'Silly Sentences',
     selectLanguage: '\u9009\u62e9\u4f60\u7684\u8bed\u8a00\uff01',
     instructionLanguage: '\u6307\u5bfc\u8bed\u8a00\uff1a',
     tapToStart: '\u70b9\u51fb\u8bcd\u8bed\u5f00\u59cb\u9020\u53e5\uff01',
