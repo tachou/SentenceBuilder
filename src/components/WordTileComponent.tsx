@@ -23,7 +23,10 @@ export const WordTileComponent = forwardRef<HTMLDivElement, WordTileProps>(
   ) {
     const showPinyin = useGameStore((s) => s.showPinyin);
     const showPos = useGameStore((s) => s.showPos);
+    const language = useGameStore((s) => s.language);
     const colors = POS_COLORS[tile.pos];
+    const isChinese = language === 'zh-Hans';
+    const textSizeClass = isChinese ? 'text-2xl md:text-3xl' : 'text-base md:text-lg';
     const displayWord = capitalize
       ? tile.word.charAt(0).toUpperCase() + tile.word.slice(1)
       : tile.word;
@@ -77,14 +80,14 @@ export const WordTileComponent = forwardRef<HTMLDivElement, WordTileProps>(
           </span>
         )}
         {tile.phonetic && showPinyin ? (
-          <ruby className="text-base md:text-lg">
+          <ruby className={textSizeClass}>
             {displayWord}
             <rp>(</rp>
             <rt className="text-[10px] font-normal text-gray-500">{tile.phonetic}</rt>
             <rp>)</rp>
           </ruby>
         ) : (
-          <span className="text-base md:text-lg">{displayWord}</span>
+          <span className={textSizeClass}>{displayWord}</span>
         )}
       </div>
     );
