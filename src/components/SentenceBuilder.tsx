@@ -28,6 +28,7 @@ export function SentenceBuilder() {
   const language = useGameStore((s) => s.language);
   const sentenceTray = useGameStore((s) => s.sentenceTray);
   const addToTray = useGameStore((s) => s.addToTray);
+  const insertTileAt = useGameStore((s) => s.insertTileAt);
   const removeFromTray = useGameStore((s) => s.removeFromTray);
   const reorderTray = useGameStore((s) => s.reorderTray);
   const clearTray = useGameStore((s) => s.clearTray);
@@ -83,7 +84,7 @@ export function SentenceBuilder() {
       const activeData = active.data.current;
       const overData = over.data.current;
 
-      // From pool to tray
+      // From pool to empty tray area (append)
       if (activeData?.area === 'pool' && over.id === 'sentence-tray') {
         addToTray(active.id as string);
         return;
@@ -95,7 +96,7 @@ export function SentenceBuilder() {
         return;
       }
 
-      // Reorder within tray
+      // Reorder within tray (sortable handles the visual, we update state)
       if (activeData?.area === 'tray' && overData?.area === 'tray') {
         const fromIndex = activeData.index as number;
         const toIndex = overData.index as number;
@@ -105,13 +106,14 @@ export function SentenceBuilder() {
         return;
       }
 
-      // From pool to a tile in the tray (insert near it)
+      // From pool to a specific position in the tray (insert at that index)
       if (activeData?.area === 'pool' && overData?.area === 'tray') {
-        addToTray(active.id as string);
+        const targetIndex = overData.index as number;
+        insertTileAt(active.id as string, targetIndex);
         return;
       }
     },
-    [addToTray, removeFromTray, reorderTray]
+    [addToTray, insertTileAt, removeFromTray, reorderTray]
   );
 
   const handleSubmit = useCallback(() => {

@@ -66,6 +66,7 @@ interface GameState {
   addToTray: (instanceId: string) => void;
   removeFromTray: (instanceId: string) => void;
   reorderTray: (fromIndex: number, toIndex: number) => void;
+  insertTileAt: (instanceId: string, index: number) => void;
   clearTray: () => void;
   submitSentence: () => void;
   clearFeedback: () => void;
@@ -205,6 +206,20 @@ export const useGameStore = create<GameState>((set, get) => ({
     const [moved] = newTray.splice(fromIndex, 1);
     newTray.splice(toIndex, 0, moved);
     set({ sentenceTray: newTray, feedback: null });
+  },
+
+  insertTileAt: (instanceId, index) => {
+    const { wordPool, sentenceTray } = get();
+    if (sentenceTray.length >= MAX_TRAY_SIZE) return;
+    const tile = wordPool.find((t) => t.instanceId === instanceId);
+    if (!tile) return;
+    const newTray = [...sentenceTray];
+    newTray.splice(index, 0, tile);
+    set({
+      wordPool: wordPool.filter((t) => t.instanceId !== instanceId),
+      sentenceTray: newTray,
+      feedback: null,
+    });
   },
 
   clearTray: () => {

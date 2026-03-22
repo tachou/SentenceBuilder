@@ -1,6 +1,7 @@
 import { useDroppable } from '@dnd-kit/core';
+import { SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable';
 import { useGameStore } from '../store/gameStore';
-import { DraggableTile } from './DraggableTile';
+import { SortableTrayTile } from './SortableTrayTile';
 import { t } from '../data/i18n';
 
 const MAX_TRAY = 12;
@@ -25,6 +26,8 @@ export function SentenceTray() {
       ? 'bg-purple-50/60 ring-2 ring-purple-300'
       : 'bg-white/80';
 
+  const tileIds = sentenceTray.map((t) => t.instanceId);
+
   return (
     <section className="px-3 md:px-6 pb-1 md:pb-2 shrink-0" aria-label="Sentence tray">
       <div
@@ -40,9 +43,11 @@ export function SentenceTray() {
           ${glowClass}
         `}
       >
-        {sentenceTray.map((tile, index) => (
-          <DraggableTile key={tile.instanceId} tile={tile} area="tray" index={index} />
-        ))}
+        <SortableContext items={tileIds} strategy={horizontalListSortingStrategy}>
+          {sentenceTray.map((tile, index) => (
+            <SortableTrayTile key={tile.instanceId} tile={tile} index={index} />
+          ))}
+        </SortableContext>
 
         {Array.from({ length: emptySlots }).map((_, i) => (
           <div
