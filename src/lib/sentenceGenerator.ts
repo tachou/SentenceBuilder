@@ -1,7 +1,7 @@
 import type { Language, WordTile } from '../types';
 
 /** A slot type that a template position can accept */
-type SlotType = 'det' | 'noun' | 'verb_copula' | 'verb_intrans' | 'verb_trans' | 'adj' | 'adv' | 'adv_manner' | 'adv_intensifier' | 'prep' | 'pronoun' | 'particle';
+type SlotType = 'det' | 'noun' | 'noun_place' | 'verb_copula' | 'verb_intrans' | 'verb_trans' | 'adj' | 'adv' | 'adv_manner' | 'adv_intensifier' | 'prep' | 'pronoun' | 'particle_de' | 'particle_le';
 
 /** Map slot types to the tile filter logic */
 const DETERMINERS = new Set(['the', 'a', 'my', 'some', 'many', 'un', 'une', 'des', 'du', 'de la', 'le', 'la', '一个', '这个', '那个', '一些', '很多']);
@@ -9,7 +9,11 @@ const PRONOUNS = new Set(['I', '我']);
 const PREPOSITIONS_EN = new Set(['in the', 'on the', 'to the', 'with a', 'at the', 'under the', 'next to', 'in front of', 'behind the', 'above the', 'near the', 'inside the', 'around the', 'from the']);
 const PREPOSITIONS_FR = new Set(['dans', 'sur', 'avec', 'pour', 'sous', 'à côté de', 'devant', 'derrière', 'au-dessus de', 'près de', 'autour de', 'vers', 'entre']);
 const PREPOSITIONS_ZH = new Set(['在', '到']);
-const PARTICLES_ZH = new Set(['的', '了']);
+/** Chinese location nouns — valid after 在/到 in locative templates */
+const PLACES_ZH = new Set([
+  '家', '学校', '树', '山', '河', '路', '公园', '花园',
+  '天空', '地上', '海', '森林', '城市', '房子',
+]);
 
 /** Intensifier adverbs — safe to use in copula templates (noun est très adj) */
 const INTENSIFIERS_FR = new Set(['très', 'vraiment', 'bien']);
@@ -159,8 +163,12 @@ function getTilesForSlot(tiles: WordTile[], slot: SlotType, lang: Language): Wor
     }
     case 'pronoun':
       return tiles.filter(t => PRONOUNS.has(t.word));
-    case 'particle':
-      return tiles.filter(t => PARTICLES_ZH.has(t.word));
+    case 'particle_de':
+      return tiles.filter(t => t.word === '的');
+    case 'particle_le':
+      return tiles.filter(t => t.word === '了');
+    case 'noun_place':
+      return tiles.filter(t => t.pos === 'noun' && PLACES_ZH.has(t.word));
     case 'prep': {
       const prepSet = lang === 'fr' ? PREPOSITIONS_FR : lang === 'zh-Hans' ? PREPOSITIONS_ZH : PREPOSITIONS_EN;
       return tiles.filter(t => prepSet.has(t.word));
@@ -195,12 +203,13 @@ const TEMPLATES: Record<Language, SentenceTemplate[]> = {
   'zh-Hans': [
     // Intransitive
     { slots: ['noun', 'verb_intrans'] },                                // 猫跑
-    { slots: ['adj', 'particle', 'noun', 'verb_intrans'] },            // 大的猫跑
-    { slots: ['noun', 'verb_intrans', 'particle'] },                   // 猫跑了
+    { slots: ['adj', 'particle_de', 'noun', 'verb_intrans'] },         // 大的猫跑
+    { slots: ['noun', 'verb_intrans', 'particle_le'] },                // 猫跑了
     // Transitive
     { slots: ['noun', 'verb_trans', 'noun'] },                         // 狗吃鱼
     { slots: ['pronoun', 'verb_trans', 'noun'] },                      // 我看书
-    { slots: ['noun', 'prep', 'noun', 'verb_intrans'] },               // 鸟在树飞
+    // Locative (only location nouns after 在/到)
+    { slots: ['noun', 'prep', 'noun_place', 'verb_intrans'] },         // 鸟在树飞
     // Adj predicate (intensifier only: 很, 真)
     { slots: ['noun', 'adv_intensifier', 'adj'] },                     // 猫很大
   ],
