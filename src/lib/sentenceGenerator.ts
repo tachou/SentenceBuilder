@@ -1,7 +1,7 @@
 import type { Language, WordTile } from '../types';
 
 /** A slot type that a template position can accept */
-type SlotType = 'det' | 'noun' | 'noun_place' | 'verb_copula' | 'verb_intrans' | 'verb_trans' | 'adj' | 'adv' | 'adv_manner' | 'adv_intensifier' | 'prep' | 'pronoun' | 'particle_de' | 'particle_le';
+type SlotType = 'det' | 'noun' | 'noun_place' | 'verb_copula' | 'verb_intrans' | 'verb_trans' | 'adj' | 'adj_attributive_zh' | 'adv' | 'adv_manner' | 'adv_intensifier' | 'prep' | 'pronoun' | 'particle_de' | 'particle_le';
 
 /** Map slot types to the tile filter logic */
 const DETERMINERS = new Set(['the', 'a', 'my', 'some', 'many', 'un', 'une', 'des', 'du', 'de la', 'le', 'la', '一个', '这个', '那个', '一些', '很多']);
@@ -9,6 +9,15 @@ const PRONOUNS = new Set(['I', '我']);
 const PREPOSITIONS_EN = new Set(['in the', 'on the', 'to the', 'with a', 'at the', 'under the', 'next to', 'in front of', 'behind the', 'above the', 'near the', 'inside the', 'around the', 'from the']);
 const PREPOSITIONS_FR = new Set(['dans', 'sur', 'avec', 'pour', 'sous', 'à côté de', 'devant', 'derrière', 'au-dessus de', 'près de', 'autour de', 'vers', 'entre']);
 const PREPOSITIONS_ZH = new Set(['在', '到']);
+/** Chinese attributive adjectives — work naturally in adj 的 noun pattern */
+const ATTRIBUTIVE_ADJ_ZH = new Set([
+  '大', '小', '红', '蓝', '绿', '黄', '紫', '白', '黑',
+  '开心', '伤心', '快', '慢', '高', '好笑', '漂亮',
+  '新', '旧', '好', '勇敢', '强壮', '善良',
+  '长', '短', '胖', '瘦', '亮', '暗', '干净', '脏',
+  '甜', '酸', '苦', '老', '年轻', '圆', '方',
+]);
+
 /** Chinese location nouns — valid after 在/到 in locative templates */
 const PLACES_ZH = new Set([
   '家', '学校', '树', '山', '河', '路', '公园', '花园',
@@ -150,6 +159,8 @@ function getTilesForSlot(tiles: WordTile[], slot: SlotType, lang: Language): Wor
     }
     case 'adj':
       return tiles.filter(t => t.pos === 'adjective');
+    case 'adj_attributive_zh':
+      return tiles.filter(t => t.pos === 'adjective' && ATTRIBUTIVE_ADJ_ZH.has(t.word));
     case 'adv':
       return tiles.filter(t => t.pos === 'adverb');
     case 'adv_manner': {
@@ -203,7 +214,7 @@ const TEMPLATES: Record<Language, SentenceTemplate[]> = {
   'zh-Hans': [
     // Intransitive
     { slots: ['noun', 'verb_intrans'] },                                // 猫跑
-    { slots: ['adj', 'particle_de', 'noun', 'verb_intrans'] },         // 大的猫跑
+    { slots: ['adj_attributive_zh', 'particle_de', 'noun', 'verb_intrans'] }, // 大的猫跑
     { slots: ['noun', 'verb_intrans', 'particle_le'] },                // 猫跑了
     // Transitive
     { slots: ['noun', 'verb_trans', 'noun'] },                         // 狗吃鱼
