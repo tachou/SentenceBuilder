@@ -201,8 +201,8 @@ const TEMPLATES: Record<Language, SentenceTemplate[]> = {
     { slots: ['noun', 'verb_trans', 'noun'] },                         // 狗吃鱼
     { slots: ['pronoun', 'verb_trans', 'noun'] },                      // 我看书
     { slots: ['noun', 'prep', 'noun', 'verb_intrans'] },               // 鸟在树飞
-    // Adj predicate
-    { slots: ['noun', 'adv', 'adj'] },                                 // 猫很大
+    // Adj predicate (intensifier only: 很, 真)
+    { slots: ['noun', 'adv_intensifier', 'adj'] },                     // 猫很大
   ],
 };
 
