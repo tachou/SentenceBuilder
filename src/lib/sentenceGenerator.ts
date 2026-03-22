@@ -58,6 +58,7 @@ const INTRANSITIVE_FR = new Set([
 ]);
 const INTRANSITIVE_ZH = new Set([
   '跑', '跳', '飞', '游泳', '走', '坐', '站', '睡觉', '唱歌', '跳舞', '爬', '长',
+  '画画', '做饭',  // activity verbs (intransitive use)
 ]);
 
 /** Transitive verbs — require an object to form a complete sentence */
@@ -72,8 +73,8 @@ const TRANSITIVE_FR = new Set([
   'lance', 'attrape', 'construit', 'aide', 'ouvre', 'ferme', 'porte', 'regarde',
 ]);
 const TRANSITIVE_ZH = new Set([
-  '吃', '喝', '看', '喜欢', '爱', '有', '读', '做饭', '画画',
-  '给', '要', '找', '藏', '扔', '接', '建', '帮助', '开', '关', '骑',
+  '吃', '喝', '看', '喜欢', '爱', '有', '读',
+  '要', '找', '藏', '扔', '接', '建', '帮助', '开', '关', '骑',
 ]);
 
 /**
@@ -92,6 +93,22 @@ const ADJ_GENDER_INVARIANT_FR = new Set([
   'rouge', 'triste', 'rapide', 'drôle', 'calme', 'jaune',
   'orange', 'brave', 'minuscule',
 ]);
+
+/** Chinese reduplicated adjectives — already intensified, can't take 很/真 */
+const REDUPLICATED_ADJ_ZH = new Set(['小小']);
+
+/** Check if a Chinese combo has intensifier + reduplicated adjective */
+function hasChineseIntensifierConflict(combo: WordTile[], slots: SlotType[]): boolean {
+  for (let i = 0; i < slots.length; i++) {
+    if (slots[i] === 'adj' && REDUPLICATED_ADJ_ZH.has(combo[i].word)) {
+      // Check if there's an intensifier before it
+      for (let j = 0; j < i; j++) {
+        if (slots[j] === 'adv_intensifier') return true;
+      }
+    }
+  }
+  return false;
+}
 
 /** English uncountable (mass) nouns — cannot use "a" as determiner */
 const UNCOUNTABLE_EN = new Set([
@@ -264,6 +281,7 @@ export function generateSentences(tiles: WordTile[], lang: Language): GeneratedS
       // Language-specific agreement checks
       if (lang === 'fr' && hasFrenchGenderConflict(combo, template.slots)) continue;
       if (lang === 'en' && hasEnglishUncountableConflict(combo, template.slots)) continue;
+      if (lang === 'zh-Hans' && hasChineseIntensifierConflict(combo, template.slots)) continue;
 
       const joiner = lang === 'zh-Hans' ? '' : ' ';
       const sentence = combo.map(t => t.word).join(joiner);
